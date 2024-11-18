@@ -137,11 +137,8 @@ For any questions or inquiries, feel free to reach out to me on GitHub or via em
 ## Screenshots
 Here’s what the application looks like:
 
-![Screenshot 1](assets/screenshot1.png)
-*Upload File Page*
-
-![Screenshot 2](assets/screenshot2.png)
-*Calculated Hash Value*
+![Screenshot 1](media/uploads/Integrity-checker-landing-page.jpg)
+*Integrity checker landing-page*
 
 ---
 
