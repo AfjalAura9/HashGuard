@@ -130,7 +130,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## Contact
 
-For any questions or inquiries, feel free to reach out to me on GitHub or via email: [afjalshaik@example.com](mailto:afjalshaik@example.com).
+For any questions or inquiries, feel free to reach out to me on GitHub or via email: [afjalshaik@example.com](mailto:afjalshaiktechy@gmail.com).
 
 ---
 
