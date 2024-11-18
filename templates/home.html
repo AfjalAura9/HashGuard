@@ -1,12 +1,61 @@
 {% extends 'base.html' %} {% block content %}
 
 <head>
-    <title>Home Page</title>
+  <title>Home Page</title>
+  <style>
+    /* General Button Styling */
+    .button {
+      display: block; /* Make the button behave like a block element (full width) */
+      width: 100%; /* Full width of the container */
+      text-align: center; /* Center-align text inside the button */
+      padding: 12px 20px; /* Comfortable padding */
+      border-radius: 30px; /* Rounded, pill-shaped buttons */
+      font-size: 16px; /* Readable font size */
+      font-family: Arial, sans-serif; /* Clean font style */
+      font-weight: bold; /* Make the text bold */
+      text-decoration: none; /* Remove underline */
+      transition: all 0.4s ease; /* Smooth transition for hover effects */
+      margin-bottom: 20px; /* Spacing between buttons */
+    }
+
+    /* Styling for Register Button (Border with hover effect) */
+    .btn-register {
+      color: #ffffff; /* Light blue text color */
+      background-color: transparent; /* No fill */
+      border: 2px solid #0f0; /* Light blue border */
+    }
+
+    .btn-register:hover {
+      background-color: #0f0; /* Light blue fill on hover */
+      color: rgb(0, 0, 0); /* White text on hover */
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.5); /* Soft shadow effect */
+      text-decoration: none;
+    }
+
+    /* Styling for Login Button (Filled with hover effect) */
+    .btn-login {
+      color: rgb(0, 0, 0); /* White text color */
+      background-color: #0f0; /* Green fill */
+    }
+
+    .btn-login:hover {
+      background-color: #0f0; /* Darker green fill on hover */
+      color: rgb(0, 0, 0);
+      text-decoration: none;
+    }
+
+    /* Container for layout */
+    .button-container {
+      max-width: 400px; /* Set a maximum width for the buttons */
+      margin: 50px auto; /* Center the container vertically and horizontally */
+    }
+  </style>
 </head>
 
 <body>
-    <h1>Welcome to Integrity checker</h1>
-
-    <a href="{% url 'register' %}">Register</a>||<a href="{% url 'login' %}">Login</a>
+  <div class="button-container">
+    <a href="{% url 'register' %}" class="button btn-register">Register</a>
+    <a href="{% url 'login' %}" class="button btn-login">Login</a>
+  </div>
 </body>
 {% endblock %}
