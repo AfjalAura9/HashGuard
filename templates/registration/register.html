@@ -1,15 +1,12 @@
 {% extends 'base.html' %} {% block content %}
-
-<title>User Registration</title>
-</head>
-
-<body>
-    <h2>Register</h2>
-    <form method="post">
-        {% csrf_token %} {{ form.as_p }}
-        <button type="submit">Register</button>
-    </form>
-    <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
-</body>
-
+<div class="auth-section">
+  <h2 class="auth-title">Create an Account</h2>
+  <form method="post" class="auth-form">
+    {% csrf_token %} {{ form.as_p }}
+    <button type="submit" class="btn">Register</button>
+  </form>
+  <p class="auth-link">
+    Already have an account? <a href="{% url 'login' %}">Log in here</a>.
+  </p>
+</div>
 {% endblock %}
