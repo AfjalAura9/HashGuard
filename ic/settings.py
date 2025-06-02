@@ -17,9 +17,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ic',
+    'widget_tweaks',
 ]
 
 AUTHENTICATION_BACKENDS = [
+     'ic.backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -55,8 +57,12 @@ WSGI_APPLICATION = 'ic.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'hashguard_db',
+        'USER': 'postgres',
+        'PASSWORD': 'Afsaaura@9',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -80,10 +86,13 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/' 
 LOGOUT_REDIRECT_URL = '/logout/'
 
-MEDIA_ROOT = 'C:/Users/somes/OneDrive/Desktop/ic/ic/media/'
+MEDIA_ROOT = 'D:/Projects/HashGuard-File-Integrity-Verification-Tool/media/uploads'
 MEDIA_URL = '/media/'

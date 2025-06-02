@@ -1,18 +1,22 @@
 # HashGuard - File Integrity Verification Tool
 
 ## Overview
+
 **HashGuard** is a web-based tool for verifying the integrity of files through hash algorithms like **MD5**, **SHA-256**, and **SHA-512**. Whether you're a developer, system administrator, or just someone who wants to verify the authenticity of downloaded files, **HashGuard** makes it easy and secure.
 
 ### Key Features:
+
 - **Upload Files** for integrity checking.
 - **Calculate Hash Values** using multiple algorithms: **MD5**, **SHA-256**, **SHA-512**, etc.
 - **View Hash Values** along with timestamps of the calculations.
 - **Built with Django** and **Python** for an easy-to-setup, scalable solution.
 
 ## Demo
+
 You can test the application locally by following the instructions below or use a live demo (if available).
 
 ## Table of Contents
+
 1. [Features](#features)
 2. [Getting Started](#getting-started)
 3. [Usage](#usage)
@@ -23,51 +27,60 @@ You can test the application locally by following the instructions below or use 
 ## Getting Started
 
 ### Prerequisites
+
 To run this project locally, you'll need:
+
 - **Python** (version 3.8 or higher)
 - **Django** (and other dependencies that will be installed automatically)
 
 ### Installation Instructions
 
 1. **Clone the repository** to your local machine:
-    ```bash
-    git clone https://github.com/AfjalAura9/HashGuard-File-Integrity-Verification-Tool.git
-    ```
+
+   ```bash
+   git clone https://github.com/AfjalAura9/HashGuard-File-Integrity-Verification-Tool.git
+   ```
 
 2. **Navigate to the project directory**:
-    ```bash
-    cd HashGuard-File-Integrity-Verification-Tool
-    ```
+
+   ```bash
+   cd HashGuard-File-Integrity-Verification-Tool
+   ```
 
 3. **Create a virtual environment** (optional, but recommended for managing dependencies):
-    ```bash
-    python -m venv venv
-    ```
+
+   ```bash
+   python -m venv venv
+   ```
 
 4. **Activate the virtual environment**:
-    - On **Windows**:
-        ```bash
-        venv\Scripts\activate
-        ```
-    - On **macOS/Linux**:
-        ```bash
-        source venv/bin/activate
-        ```
+
+   - On **Windows**:
+     ```bash
+     venv/Scripts/activate
+     ```
+   - On **macOS/Linux**:
+     ```bash
+     source venv/bin/activate
+     ```
 
 5. **Install required dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 6. **Apply database migrations** (this step ensures that the database is set up correctly):
-    ```bash
-    python manage.py migrate
-    ```
+
+   ```bash
+   python manage.py migrate
+   ```
 
 7. **Run the development server**:
-    ```bash
-    python manage.py runserver
-    ```
+
+   ```bash
+   python manage.py runserver
+   ```
 
 8. **Visit the app in your browser** at [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
 
@@ -76,13 +89,16 @@ To run this project locally, you'll need:
 ## Usage
 
 1. **Upload a File:**
+
    - Click the **"Upload File"** button on the home page.
    - Choose the file you want to check for integrity.
 
 2. **Choose Hash Algorithm:**
+
    - Once the file is uploaded, select a hash algorithm (MD5, SHA-256, or SHA-512) from the dropdown.
 
 3. **View the Hash Value:**
+
    - After clicking **"Calculate"**, the hash value for the file will be displayed on the page along with a timestamp.
 
 4. **Verify File Integrity:**
@@ -107,6 +123,7 @@ These algorithms are widely used for verifying file integrity, especially when d
 Contributions are welcome! If you'd like to improve this project, feel free to fork the repository, make your changes, and submit a pull request.
 
 ### Steps to Contribute:
+
 1. Fork this repository.
 2. Create a new branch (`git checkout -b feature/your-feature-name`).
 3. Make your changes and commit them (`git commit -am 'Add new feature'`).
@@ -122,6 +139,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ---
 
 ## Acknowledgements
+
 - **Django** for the powerful web framework.
 - **Python** for making this project easy and flexible to implement.
 - Any libraries or resources used in the project (e.g., `hashlib`).
@@ -135,10 +153,11 @@ For any questions or inquiries, feel free to reach out to me on GitHub or via em
 ---
 
 ## Screenshots
+
 Here’s what the application looks like:
 
 ![Screenshot 1](media/uploads/Integrity-checker-landing-page.jpg)
-*Integrity checker landing-page*
+_Integrity checker landing-page_
 
 ---
 

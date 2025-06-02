@@ -9,15 +9,30 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('logout/', views.user_logout, name='logout'),
     path('profile/', views.profile, name='profile'),
+
     path('upload/', views.upload_file, name='upload_file'),
-    path('check_integrity/<int:file_id>/', views.check_integrity, name='check_integrity'),
-    path('check_malware/<int:file_id>/', views.check_malware, name='check_malware'),
+
+    path('check_integrity/<int:file_id>/',
+         views.check_integrity, name='check_integrity'),
+    path('check_malware/<int:file_id>/',
+         views.check_malware, name='check_malware'),
     path('success/', views.success, name='success'),
-    path('check_url_reputation/', views.check_url_reputation, name='check_url_reputation'),
-    path('execute-scan-for-malware/', views.execute_scan_for_malware, name='execute_scan_for_malware'),
-    path('scan-report/', views.execute_scan_for_malware, name='scan_report'),
-    path('execute-scan-for-malware/', views.execute_scan_for_malware, name='execute_scan_for_malware'),
-    path('get-scan-report/<str:scan_id>/', views.get_scan_report, name='get_scan_report'),
 
+    path('check-url-reputation/', views.check_url_reputation,
+         name='url_reputation_checker'),
+
+    path('execute-scan-for-malware/', views.execute_scan_for_malware,
+         name='execute_scan_for_malware'),
+    path('scan-reports/', views.scan_reports_list, name='scan_reports_list'),
+    path('scan-reports/<int:scan_id>/', views.scan_reports, name='scan_reports'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+
+    path('file-integrity-status/', views.file_integrity_status,
+         name='file_integrity_status'),
+
+    path('delete-scanned-url/<int:url_id>/',
+         views.delete_scanned_url, name='delete_scanned_url'),
+
+    path('scan-reports/delete/<int:report_id>/',
+         views.delete_scan_report, name='delete_scan_report'),
 ]
-

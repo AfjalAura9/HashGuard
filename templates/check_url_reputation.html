@@ -1,37 +1,519 @@
-{% extends 'base.html' %} {% block content %}
+{% extends "base.html" %} {% block title %}URL Reputation Checker{% endblock %}
+{% block content %}
 <style>
-    .malware-detected {
-        background-color: red;
-        color: white;
-        padding: 10px;
+  body {
+    background: #fff;
+  }
+  .url-reputation-main-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1877ff;
+    text-align: center;
+    margin-top: 2.5rem;
+    margin-bottom: 0.7rem;
+    letter-spacing: 0.5px;
+    font-family: "inter", Arial, sans-serif;
+  }
+  .url-reputation-desc {
+    text-align: center;
+    color: #222;
+    font-size: 1rem;
+    margin-bottom: 2.2rem;
+    font-family: "inter", Arial, sans-serif;
+  }
+  .url-reputation-desc .privacy {
+    color: #e53935;
+    font-weight: 500;
+  }
+  .url-reputation-form-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.2rem;
+  }
+  .url-reputation-form {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    /* border: 2px solid #1877ff; Add a border to the entire form */
+    border-radius: 2.2rem; /* Make the entire form rounded */
+    box-shadow: 0 6px 16px #83b7ff; /* Optional: Add a shadow */
+    width: 60%;
+    max-width: 95vw;
+    overflow: hidden; /* Ensure the button and input stay inside the rounded container */
+  }
+  .url-reputation-form input[type="url"] {
+    border: none; /* Remove the default border */
+    flex: 1; /* Allow the input to take up available space */
+    padding: 0.85rem 1.2rem; /* Add padding for better spacing */
+    font-size: 1.13rem;
+    font-family: "inter", Arial, sans-serif;
+    color: #222;
+    border-radius: 0; /* Remove individual border radius */
+    outline: none; /* Remove the default outline */
+  }
+  .url-reputation-form input[type="url"]::placeholder {
+    color: #888;
+    opacity: 1;
+    font-size: 1rem;
+  }
+  .url-reputation-form button {
+    background: #1877ff;
+    color: #fff;
+    border: none;
+    padding: 0.85rem 2.1rem;
+    font-size: 1.13rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: none; /* Remove extra shadow */
+    transition: background 0.2s, transform 0.2s;
+    border-radius: 0; /* Remove individual border radius */
+  }
+  .url-reputation-form button:hover {
+    background: #125fd1;
+  }
+  .url-reputation-form button:active {
+    background: #0e4bb8;
+    transform: scale(0.98);
+  }
+  /* Floating notification */
+  .float-notification {
+    position: fixed;
+    top: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 300px;
+    max-width: 90vw;
+    z-index: 9999;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-size: 1.13rem;
+    font-family: "inter", Arial, sans-serif;
+    box-shadow: 0 2px 16px rgba(24, 119, 255, 0.13);
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .float-notification.success {
+    background: #e6f4ea;
+    color: #1ca14a;
+    border: 1.5px solid #1ca14a;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .float-notification.danger {
+    background: #ffeaea;
+    color: #e53935;
+    border: 1.5px solid #e53935;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .float-notification.warning {
+    background: #fffbe6;
+    color: #e6a700;
+    border: 1.5px solid #e6a700;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Table styles */
+  .url-reputation-table-section {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .url-reputation-table-container {
+    width: 100%;
+    max-width: 70vw;
+    background: #fff;
+    border: 1px solid black;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(24, 119, 255, 0.07);
+    overflow: hidden;
+  }
+  .url-reputation-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "inter", Arial, sans-serif;
+  }
+  .url-reputation-table th {
+    background: #1877ff;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.08rem;
+    padding: 1rem 0.7rem;
+    text-align: left;
+    letter-spacing: 0.2px;
+    position: relative;
+    user-select: none;
+  }
+  .url-reputation-table td {
+    background: #f8fafc;
+    color: #222;
+    font-size: 1.05rem;
+    padding: 0.9rem 0.7rem;
+    border-bottom: 1px solid #e3e8ee;
+    vertical-align: middle;
+  }
+  .url-reputation-table tr:last-child td {
+    border-bottom: none;
+  }
+  .url-reputation-table .bi {
+    font-size: 1.2rem;
+    vertical-align: middle;
+  }
+  .url-reputation-table .copy-btn {
+    background: none;
+    border: none;
+    color: #1877ff;
+    cursor: pointer;
+    margin-left: 0.3rem;
+    font-size: 1.1rem;
+    transition: color 0.2s;
+  }
+  .url-reputation-table .copy-btn:hover {
+    color: #125fd1;
+  }
+  .url-reputation-table .status-active {
+    color: #1ca14a;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .url-reputation-table .status-inactive {
+    color: #e6a700;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  /* Dropdown styles */
+  .status-dropdown {
+    display: inline-block;
+    position: relative;
+  }
+  .status-dropdown-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.08rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0;
+  }
+  .status-dropdown-list {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 110%;
+    background: #fff;
+    border: 1px solid #dbeafe;
+    box-shadow: 0 2px 8px #dbeafe55;
+    border-radius: 7px;
+    min-width: 120px;
+    z-index: 10;
+  }
+  .status-dropdown-list.show {
+    display: block;
+  }
+  .status-dropdown-option {
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    color: #222;
+    font-size: 1.05rem;
+    transition: background 0.2s;
+  }
+  .status-dropdown-option:hover,
+  .status-dropdown-option.active {
+    background: white;
+    color: #125fd1;
+  }
+  .no-scans-message {
+    text-align: center;
+    color: #888;
+    font-size: 1.13rem;
+    margin: 2.5rem 0 2.5rem 0;
+    font-family: "inter", Arial, sans-serif;
+  }
+  /* Make all short links the same width and align clipboard icon */
+  .short-link-text {
+    display: inline-block;
+    width: 350px; /* Adjust as needed */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+  }
+  .copy-btn {
+    vertical-align: middle;
+    margin-left: 0.3rem;
+    /* ...existing styles... */
+  }
+  .delete-btn {
+    background: none;
+    border: none;
+    color: #e53935;
+    cursor: pointer;
+    margin-left: 0.3rem;
+    font-size: 1.1rem;
+    vertical-align: middle;
+    transition: color 0.2s;
+  }
+  .delete-btn:hover {
+    color: #b71c1c;
+  }
+  @media (max-width: 700px) {
+    .url-reputation-form,
+    .url-reputation-table-container {
+      width: 98vw;
+      min-width: 0;
     }
+    .url-reputation-main-title {
+      font-size: 2rem;
+    }
+    .url-reputation-table th,
+    .url-reputation-table td {
+      font-size: 0.97rem;
+      padding: 0.7rem 0.4rem;
+    }
+  }
 </style>
 
-<div style="text-align: center;">
-    <h1>Check URL Reputation</h1>
-
-
-    <form method="post" action="{% url 'check_url_reputation' %}">
-        {% csrf_token %}
-        <label for "url">URL to Check:</label>
-        <input type="text" name="url" required>
-        <button type="submit" class="check-reputation-button">Check Reputation</button>
+<div>
+  <div class="url-reputation-main-title">URL REPUTATION CHECKER</div>
+  <div class="url-reputation-desc">
+    Paste a URL below to check its reputation using VirusTotal.<br />
+    We respect your privacy. <span class="privacy">No data is stored.</span>
+  </div>
+  <div class="url-reputation-form-row">
+    <form
+      method="post"
+      class="url-reputation-form"
+      novalidate
+      autocomplete="off"
+      id="url-reputation-form"
+    >
+      {% csrf_token %}
+      <input
+        type="url"
+        name="url"
+        placeholder="http://example.com"
+        required
+      />
+      <button type="submit" aria-label="Check URL Reputation">
+        <i class="bi bi-search"></i> Scan Now
+      </button>
     </form>
+  </div>
 
-    {% if result == "Malware Detected" %}
-    <div style="text-align: center;" class="malware-detected">
-        <h2>Reputation Result:</h2>
-        <p>{{ result }}</p>
-    </div>
-    {% elif result %}
-    <div style="text-align: center;">
-        <h2>Reputation Result:</h2>
-        <p>{{ result }}</p>
-    </div>
-    {% endif %}
+  <!-- Floating notification -->
+  <div id="float-notification" class="float-notification" style="display: none">
+    <span id="float-notification-icon"></span>
+    <span id="float-notification-message"></span>
+  </div>
 
-    <div style="text-align: center;">
-        <a href="{% url 'profile' %}" class="blink">Back to Profile</a>
+  <div class="url-reputation-table-section">
+    <div class="url-reputation-table-container">
+      {% if links and links|length > 0 %}
+      <table class="url-reputation-table" id="url-table">
+        <thead>
+          <tr>
+            <th>URL</th>
+            <th>
+              <div class="status-dropdown">
+                <button
+                  type="button"
+                  class="status-dropdown-btn"
+                  id="status-dropdown-btn"
+                >
+                  Status <i class="bi bi-caret-down-fill"></i>
+                </button>
+                <div class="status-dropdown-list" id="status-dropdown-list">
+                  <div class="status-dropdown-option active" data-status="all">
+                    All
+                  </div>
+                  <div class="status-dropdown-option" data-status="active">
+                    Active
+                  </div>
+                  <div class="status-dropdown-option" data-status="inactive">
+                    Inactive
+                  </div>
+                  <div class="status-dropdown-option" data-status="malicious">
+                    Malicious
+                  </div>
+                </div>
+              </div>
+            </th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for link in links %}
+          <tr data-status="{{ link.status|lower }}">
+            <td>
+              <span class="short-link-text">{{ link.short_url }}</span>
+              <button
+                class="copy-btn"
+                title="Copy"
+                onclick="navigator.clipboard.writeText('{{ link.short_url }}'); this.innerHTML='<i class=&quot;bi bi-clipboard-check&quot;></i>'; setTimeout(()=>{this.innerHTML='<i class=&quot;bi bi-clipboard&quot;></i>';},1200);"
+              >
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </td>
+            <td class="status-{{ link.status|lower }}">
+              {{ link.status|title }} {% if link.status|lower == "active" %}
+              <i class="bi bi-link-45deg"></i>
+              {% elif link.status|lower == "inactive" %}
+              <i class="bi bi-exclamation-triangle"></i>
+              {% elif link.status|lower == "malicious" %}
+              <i class="bi bi-x-octagon"></i>
+              {% endif %}
+            </td>
+            <td>
+              {{ link.date }}
+              <button
+                class="delete-btn"
+                title="Delete"
+                data-url-id="{{ link.id }}"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="no-scans-message">No scans performed.</div>
+      {% endif %}
     </div>
+  </div>
 </div>
+
+<script>
+  // Floating notification logic
+  {% if result %}
+    window.addEventListener('DOMContentLoaded', function() {
+      var notif = document.getElementById('float-notification');
+      var icon = document.getElementById('float-notification-icon');
+      var msg = document.getElementById('float-notification-message');
+      notif.className = 'float-notification {{ result.status|lower }}';
+      notif.style.display = 'flex';
+      // Set icon
+      if ("{{ result.status|lower }}" === "success") {
+        icon.innerHTML = '<i class="bi bi-shield-check"></i>';
+      } else if ("{{ result.status|lower }}" === "danger") {
+        icon.innerHTML = '<i class="bi bi-x-octagon"></i>';
+      } else if ("{{ result.status|lower }}" === "warning") {
+        icon.innerHTML = '<i class="bi bi-exclamation-triangle"></i>';
+      } else {
+        icon.innerHTML = '';
+      }
+      msg.textContent = "{{ result.message|escapejs }}";
+      setTimeout(function() {
+        notif.style.opacity = 0;
+        setTimeout(function() {
+          notif.style.display = 'none';
+        }, 400);
+      }, 3500);
+    });
+  {% endif %}
+
+  // Clear input after successful scan
+  {% if result and result.status|lower == "success" %}
+    window.addEventListener('DOMContentLoaded', function() {
+      var form = document.getElementById('url-reputation-form');
+      var input = form.querySelector('input[type="url"]');
+      if (input) input.value = '';
+    });
+  {% endif %}
+
+  // Status dropdown filter logic
+  (function() {
+    var btn = document.getElementById('status-dropdown-btn');
+    var list = document.getElementById('status-dropdown-list');
+    var options = list.querySelectorAll('.status-dropdown-option');
+    var rows = document.querySelectorAll('#url-table tbody tr');
+    var activeOption = list.querySelector('.status-dropdown-option.active');
+
+    btn && btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      list.classList.toggle('show');
+    });
+    document.body.addEventListener('click', function() {
+      list.classList.remove('show');
+    });
+
+    options.forEach(function(option) {
+      option.addEventListener('click', function(e) {
+        e.stopPropagation();
+        options.forEach(opt => opt.classList.remove('active'));
+        this.classList.add('active');
+        var status = this.getAttribute('data-status');
+        rows.forEach(function(row) {
+          if (status === 'all') {
+            row.style.display = '';
+          } else if (status === 'malicious') {
+            var rowStatus = row.getAttribute('data-status');
+            row.style.display = (rowStatus === 'malicious' || rowStatus === 'danger') ? '' : 'none';
+          } else {
+            row.style.display = (row.getAttribute('data-status') === status) ? '' : 'none';
+          }
+        });
+        list.classList.remove('show');
+      });
+    });
+  })();
+
+  // Get CSRF token from cookie (Django default)
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  document.querySelectorAll('.delete-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (!confirm("Are you sure you want to delete this link?")) return;
+      var urlId = this.getAttribute('data-url-id');
+      var row = this.closest('tr');
+      fetch(`/delete-scanned-url/${urlId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrftoken,
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          row.remove();
+          if (document.querySelectorAll('#url-table tbody tr').length === 0) {
+            document.querySelector('.url-reputation-table-container').innerHTML = '<div class="no-scans-message">No scans performed.</div>';
+          }
+        } else {
+          alert("Failed to delete link.");
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}

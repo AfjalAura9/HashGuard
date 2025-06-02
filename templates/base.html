@@ -1,493 +1,241 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Integrity Checker</title>
-    <!-- Bootstrap CDN for responsive design -->
+    <title>{% block title %}HashGuard{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
-    <!-- Google Fonts -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
       rel="stylesheet"
     />
     <style>
-      /* Updated Section Styles */
-      /* Section Styles */
-      /* Section Styles */
-      section {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 2px;
-        flex-wrap: wrap;
+      body {
+        font-family: "Inter", sans-serif;
+      }
+
+      .dropdown-item.bg-danger:hover,
+      .dropdown-item.bg-danger:focus {
+        background-color: #bb2d3b !important;
+        color: #fff !important;
+      }
+      .profile-dropdown-box {
+        border-radius: 1.5rem;
+        min-width: 320px;
+        max-width: 350px;
         overflow: hidden;
       }
-
-      /* Animated gradient effect */
-      section::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(#000, #0f0, #000);
-        animation: animate 5s linear infinite;
+      .profile-avatar {
+        overflow: hidden;
       }
-
-      /* Animation keyframes */
-      @keyframes animate {
-        0% {
-          transform: translateY(-100%);
-        }
-        100% {
-          transform: translateY(100%);
-        }
+      .profile-dropdown-item {
+        text-decoration: none;
+        color: #222;
+        transition: background 0.15s, color 0.15s;
+        cursor: pointer;
+        background: #fff;
       }
-
-      /* Styling for individual spans (hoverable boxes) */
-      section span {
-        position: relative;
-        display: block;
-        width: calc(6.25vw - 2px);
-        height: calc(6.25vw - 2px);
-        background: #181818;
-        z-index: 2; /* Above the gradient but below the container */
-        transition: 1.5s;
+      .profile-dropdown-item:hover,
+      .profile-dropdown-item:focus {
+        background: #e9ecef !important;
+        color: #1746a2 !important;
+        text-decoration: none;
       }
-
-      section span:hover {
-        background: #0f0; /* Change color on hover */
-        transition: 0s;
+      .profile-dropdown-item.text-danger:hover,
+      .profile-dropdown-item.text-danger:focus {
+        background: #ffeaea !important;
+        color: #bb2d3b !important;
       }
-
-      /* General Styles */
-      body {
-        font-family: "Poppins", sans-serif;
-        margin: 0;
+      .profile-main-card {
+        background: #fff;
+        border-radius: 2rem;
+        max-width: 600px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         padding: 0;
+        overflow: hidden;
+      }
+      .profile-header {
+        display: flex;
+        align-items: center;
+        padding: 2.5rem 2.5rem 1.5rem 2.5rem;
+        gap: 1.5rem;
+        position: sticky;
+      }
+      .profile-avatar {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background: #f1f3f6;
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
-        background-color: #151a16; /* Dark background */
-        color: #ecf0f1; /* Light text color for contrast */
+        font-size: 3.5rem;
+        color: #bdbdbd;
+        overflow: hidden;
+        flex-shrink: 0;
       }
-
-      /* Container Styling */
-      .container {
-        padding: 40px;
-        background-color: #000802;
-        border-radius: 12px;
-        box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.6);
-        max-width: 700px;
-        width: 100%;
-        text-align: center;
-        position: relative; /* Ensure it's above the spans */
-        z-index: 10; /* Ensure it appears on top of the background */
+      .profile-user-info {
+        flex: 1;
       }
-
-      /* Header and Subheader */
-      .header {
-        font-size: 28px;
-        margin-bottom: 15px;
-        font-weight: 600;
-        color: #0f0; /* Light blue color for header */
+      .profile-user-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #23272f;
+        margin-bottom: 0.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
-
-      .subheader {
-        font-size: 16px;
-        margin-bottom: 30px;
-        color: #ffffff; /* Light grey for the subheader */
+      .profile-user-email {
+        font-size: 1.08rem;
+        color: #7b7b7b;
+        margin-bottom: 0.2rem;
+        word-break: break-all;
       }
-
-      /* Styling for the auth-section */
-      .auth-section {
-        background-color: #151a16;
-        border: 1px solid #0f0;
-        border-radius: 12px;
-        padding: 40px;
-        box-shadow: 0px 8px 15px rgba(0, 255, 0, 0.2);
-        text-align: center;
-        width: 100%;
-        max-width: 100%;
-        margin: auto;
-        z-index: 11; /* Ensure it's above background elements */
-        position: relative;
-      }
-
-      /* Title and subtitle styling */
-      .auth-title {
-        font-size: 24px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        color: #0f0;
-      }
-
-      .auth-subtitle {
-        font-size: 16px;
-        color: #ecf0f1;
-        margin-bottom: 20px;
-      }
-
-      /* Form field styling */
-      .auth-form input[type="text"],
-      .auth-form input[type="password"],
-      .auth-form input[type="email"] {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 15px;
-        background-color: #151a16;
-        color: #ecf0f1;
-        border: 1px solid #0f0;
-        border-radius: 8px;
-        font-size: 16px;
-      }
-
-      .auth-form input[type="text"]:focus,
-      .auth-form input[type="password"]:focus,
-      .auth-form input[type="email"]:focus {
-        outline: none;
-        border-color: #ffffff;
-        background-color: none;
-        box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
-      }
-
-      /* Button styling */
-      .auth-form .btn {
-        width: 100%;
-        padding: 14px;
-        background-color: #0f0;
-        color: #ecf0f1;
+      .profile-divider {
         border: none;
-        font-size: 16px;
-        cursor: pointer;
-        border-radius: 8px;
-        transition: background-color 0.3s ease, transform 0.2s;
+        border-top: 1px solid #ececec;
+        margin: 0 2.5rem;
       }
-
-      .auth-form .btn:hover {
-        background-color: #0f0;
-        color: #000;
-        transform: scale(1.02);
+      .profile-form-section {
+        padding: 2rem 2.5rem 2.5rem 2.5rem;
       }
-
-      .auth-form .btn:active {
-        background-color: #1f618d;
+      .profile-label {
+        font-size: 1.02rem;
+        font-weight: 600;
+        color: #23272f;
+        margin-bottom: 0.3rem;
       }
-
-      /* Link styling */
-      .auth-link {
-        margin-top: 20px;
-        font-size: 14px;
-        color: #ecf0f1;
+      .profile-input,
+      .profile-textarea {
+        width: 100%;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.8rem;
+        font-size: 1.08rem;
+        padding: 0.7rem 1rem;
+        background: #f8fafc;
+        color: #222;
+        outline: none;
+        margin-bottom: 1.2rem;
+        transition: border 0.2s, box-shadow 0.2s;
+        resize: none;
       }
-
-      .auth-link a {
-        color: #0f0;
-        text-decoration: none;
-        font-weight: 500;
+      .profile-input:focus,
+      .profile-textarea:focus {
+        border-color: #008BC6;
+        background: #f1f5ff;
+        box-shadow: 0 0 0 2px #008BC622;
       }
-
-      .auth-link a:hover {
-        text-decoration: underline;
-      }
-
-      /* Mobile Responsiveness */
-      @media (max-width: 768px) {
-        .container {
-          padding: 20px;
-          width: 90%;
+      @media (max-width: 700px) {
+        .profile-main-card {
+          max-width: 98vw;
         }
-
-        .header {
-          font-size: 24px;
+        .profile-header,
+        .profile-form-section {
+          padding: 1.2rem 0.7rem 1rem 0.7rem;
+        }
+        .profile-divider {
+          margin: 0 0.7rem;
         }
       }
     </style>
+    {% block extra_head %}{% endblock %}
   </head>
-
   <body>
-    <div class="container">
-      <div class="header">Integrity Checker</div>
-      <div class="subheader">
-        Please enter your details to log in or register
+    <nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm">
+      <div class="container">
+    <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">
+  <img src="{% static 'images/HashGuard_logo-removebg-cropped.png' %}" alt="Logo" width="128" style="margin-right:8px;">
+   </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            {% if user.is_authenticated %}
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                href="#"
+                class="nav-link d-flex align-items-center text-white"
+                id="profileDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="bi bi-person-circle fs-4" style="color: #008BC6;"></i>
+              </a>
+              <div
+                class="dropdown-menu dropdown-menu-end p-0 border-0 shadow profile-dropdown-box"
+                aria-labelledby="profileDropdown"
+                style="min-width: 320px; border-radius: 1.5rem;"
+              >
+                <div class="p-4 pb-3 border-bottom d-flex align-items-center">
+                  <div
+                    class="profile-avatar rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
+                    style="width:72px;height:72px;"
+                  >
+                    <i
+                      class="bi bi-person-circle text-secondary"
+                      style="font-size:3rem;"
+                    ></i>
+                  </div>
+                  <div>
+                    <div
+                      class="fw-semibold"
+                      style="font-size:1.15rem;"
+                    >{{ user.get_full_name|default:user.email }}</div>
+                    <div
+                      class="text-muted"
+                      style="font-size:0.98rem;"
+                    >{{ user.email }}</div>
+                  </div>
+                </div>
+                <a
+                  href="#"
+                  class="profile-dropdown-item d-flex align-items-center justify-content-between px-4 py-3 border-bottom"
+                  style="background:#f8f9fa;"
+                  data-bs-toggle="modal"
+                  data-bs-target="#profileModal"
+                >
+                  <span class="d-flex align-items-center">
+                    <i class="bi color-bi-person fs-5 me-2" style="color: #1746a2;"></i>
+                    <span class="fw-semibold" style="font-size:1.08rem;">My Profile</span>
+                  </span>
+                  <i class="bi bi-chevron-right text-secondary"></i>
+                </a>
+                <a
+                  href="{% url 'logout' %}"
+                  class="profile-dropdown-item d-flex align-items-center px-4 py-3 text-danger fw-semibold"
+                  style="font-size:1.08rem;"
+                >
+                  <i class="bi bi-box-arrow-right fs-5 me-2"></i>
+                  Log Out
+                </a>
+              </div>
+            </li>
+            {% else %}
+            {% endif %}
+          </ul>
+        </div>
       </div>
-      <div class="auth-form">
-        <!-- Block for dynamic content -->
-        {% block content %} {% endblock %}
-      </div>
-    </div>
-    <section>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-    </section>
+    </nav>
+    <main>{% block content %}{% endblock %}</main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
   </body>
 </html>

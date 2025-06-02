@@ -1,61 +1,187 @@
-{% extends 'base.html' %} {% block content %}
-
-<head>
-  <title>Home Page</title>
-  <style>
-    /* General Button Styling */
-    .button {
-      display: block; /* Make the button behave like a block element (full width) */
-      width: 100%; /* Full width of the container */
-      text-align: center; /* Center-align text inside the button */
-      padding: 12px 20px; /* Comfortable padding */
-      border-radius: 30px; /* Rounded, pill-shaped buttons */
-      font-size: 16px; /* Readable font size */
-      font-family: Arial, sans-serif; /* Clean font style */
-      font-weight: bold; /* Make the text bold */
-      text-decoration: none; /* Remove underline */
-      transition: all 0.4s ease; /* Smooth transition for hover effects */
-      margin-bottom: 20px; /* Spacing between buttons */
+{% extends 'base.html' %} {% load widget_tweaks %} {% block title %}Home Page{%
+endblock %} {% block content %}
+<style>
+  .home-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    padding: 2.5rem 2rem 2rem 2rem;
+    max-width: 400px;
+    margin: auto;
+    background: #fff;
+  }
+  .home-brand {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #008bc6;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  .home-brand .bi {
+    font-size: 2rem;
+    color: #008bc6;
+  }
+  .login-tabs {
+    display: flex;
+    margin-bottom: 1.5rem;
+    justify-content: center;
+    align-items: center;
+  }
+  .login-tabs .btn-left {
+    min-width: 140px;
+    height: 48px;
+    border-radius: 5px 0px 0px 5px;
+    font-weight: 500;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+  }
+  .login-tabs .btn-right {
+    min-width: 140px;
+    height: 48px;
+    border-radius: 0px 5px 5px 0px;
+    font-weight: 500;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+  }
+  .login-tabs .btn-primary {
+    background: #008bc6;
+    border-color: #008bc6;
+    color: #fff;
+  }
+  .login-tabs .btn-light {
+    background: #f1f5f9;
+    color: #64748b;
+    width: 140px;
+    height: 48px;
+  }
+  .btn {
+    height: 52px;
+  }
+  .form-label {
+    font-weight: 600;
+    color: #222;
+    display: block;
+    font-size: 1.15rem;
+    letter-spacing: 0.01em;
+  }
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  .custom-input {
+    width: 100%;
+    border: 1px solid #008bc633;
+    border-radius: 12px;
+    font-size: 1.35rem;
+    padding: 1rem 1.2rem;
+    background: #f4f8ff;
+    color: #da0000;
+    outline: none;
+    transition: border 0.2s;
+    margin-bottom: 0.5rem;
+  }
+  .custom-input:focus {
+    border-color: #008bc6;
+    background: #eaf1ff;
+    box-shadow: 0 0 0 2px #008bc622;
+  }
+  @media (max-width: 576px) {
+    .home-card {
+      padding: 2rem 0.5rem 1.5rem 0.5rem;
     }
-
-    /* Styling for Register Button (Border with hover effect) */
-    .btn-register {
-      color: #ffffff; /* Light blue text color */
-      background-color: transparent; /* No fill */
-      border: 2px solid #0f0; /* Light blue border */
-    }
-
-    .btn-register:hover {
-      background-color: #0f0; /* Light blue fill on hover */
-      color: rgb(0, 0, 0); /* White text on hover */
-      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.5); /* Soft shadow effect */
-      text-decoration: none;
-    }
-
-    /* Styling for Login Button (Filled with hover effect) */
-    .btn-login {
-      color: rgb(0, 0, 0); /* White text color */
-      background-color: #0f0; /* Green fill */
-    }
-
-    .btn-login:hover {
-      background-color: #0f0; /* Darker green fill on hover */
-      color: rgb(0, 0, 0);
-      text-decoration: none;
-    }
-
-    /* Container for layout */
-    .button-container {
-      max-width: 400px; /* Set a maximum width for the buttons */
-      margin: 50px auto; /* Center the container vertically and horizontally */
-    }
-  </style>
-</head>
-
-<body>
-  <div class="button-container">
-    <a href="{% url 'register' %}" class="button btn-register">Register</a>
-    <a href="{% url 'login' %}" class="button btn-login">Login</a>
+  }
+</style>
+<div
+  class="container d-flex align-items-center justify-content-center min-vh-100"
+>
+  <div class="home-card w-100">
+    <div class="home-brand mb-4">
+      <i class="bi bi-shield-lock"></i><span>HashGuard</span>
+    </div>
+    <div class="text-center mb-2">
+      <span class="text-secondary fs-5">Sign in to your account</span>
+    </div>
+    <div class="login-tabs mb-3">
+      <button
+        type="button"
+        class="btn-left {% if active_tab == 'signin' %}btn-primary{% else %}btn-light{% endif %}"
+        onclick="window.location.href='{% url 'login' %}'"
+      >
+        Sign in
+      </button>
+      <button
+        type="button"
+        class="btn-right {% if active_tab == 'signup' %}btn-primary{% else %}btn-light{% endif %}"
+        onclick="window.location.href='{% url 'register' %}'"
+      >
+        Sign up
+      </button>
+    </div>
+    {% if form.errors %}
+    <div class="alert alert-danger" role="alert">
+      Please correct the errors below.
+    </div>
+    {% endif %}
+    <form method="post" novalidate autocomplete="off">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="{{ form.email.id_for_label }}" class="form-label"
+          >Email</label
+        >
+        {{ form.email|add_class:"custom-input"|attr:"placeholder:Enter your
+        email" }} {% if form.email.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.email.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+      {% if active_tab == 'signin' %}
+      <div class="form-group">
+        <label for="{{ form.password.id_for_label }}" class="form-label"
+          >Password</label
+        >
+        {{ form.password|add_class:"custom-input"|attr:"placeholder:Enter your
+        password" }} {% if form.password.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.password.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %} {% if active_tab == 'signup' and form.password1 %}
+      <div class="form-group">
+        <label for="{{ form.password1.id_for_label }}" class="form-label"
+          >Password</label
+        >
+        {{ form.password1|add_class:"custom-input"|attr:"placeholder:Enter your
+        password" }} {% if form.password1.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.password1.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        <label for="{{ form.password2.id_for_label }}" class="form-label"
+          >Confirm Password</label
+        >
+        {{ form.password2|add_class:"custom-input"|attr:"placeholder:Confirm
+        your password" }} {% if form.password2.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.password2.errors|striptags }}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+      <button type="submit" class="btn btn-primary w-100">
+        {% if active_tab == 'signup' %}Sign up{% else %}Sign in{% endif %}
+      </button>
+    </form>
   </div>
-</body>
+</div>
 {% endblock %}

@@ -1,0 +1,507 @@
+{% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block content %}
+
+<style>
+  .dashboard-main-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  .dashboard-upload-card {
+    width: 100%; /* Full width */
+    max-width: 100%; /* Ensure it spans the full width */
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.13);
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 2rem 2rem 2rem;
+    text-align: center;
+  }
+
+  .dashboard-upload-card .dashboard-icon {
+    font-size: 3rem;
+    color: #008bc6;
+  }
+
+  .dashboard-upload-card .upload-dropzone {
+    border: 3px dashed #008bc6;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 2.2rem 1.5rem 1.5rem 1.5rem;
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .dashboard-upload-card .upload-dropzone.dragover {
+    border-color: #1877ff;
+    background: #f1f5ff;
+  }
+
+  .dashboard-upload-card .upload-folder-icon {
+    font-size: 2.7rem;
+    color: #008bc6;
+    margin-bottom: 0.7rem;
+  }
+
+  .dashboard-upload-card .upload-dropzone-text {
+    color: #273a4d;
+    font-size: 1.09rem;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  .dashboard-upload-card .upload-dropzone-or {
+    color: #b0b8c9;
+    font-size: 0.97rem;
+    margin: 0.6rem 0 0.5rem 0;
+    width: 100%;
+    text-align: center;
+    position: relative;
+  }
+
+  .dashboard-upload-card .upload-dropzone-or::before,
+  .dashboard-upload-card .upload-dropzone-or::after {
+    content: "";
+    display: inline-block;
+    width: 40%;
+    height: 1px;
+    background: #e5e7eb;
+    vertical-align: middle;
+    margin: 0 0.5rem;
+  }
+
+  .dashboard-upload-card .upload-browse-btn {
+    background: #fff;
+    color: #008bc6;
+    border: 1.5px solid #008bc6;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 0.55rem 1.3rem;
+    cursor: pointer;
+    margin-bottom: 0.2rem;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+  }
+
+  .dashboard-upload-card .upload-browse-btn:hover {
+    background: #008bc6;
+    color: #fff;
+  }
+
+  .dashboard-upload-card .upload-dropzone input[type="file"] {
+    display: none;
+  }
+
+  .dashboard-upload-card .selected-file-name {
+    margin-top: 0.7rem;
+    color: #1877ff;
+    font-size: 1.05rem;
+    font-weight: 500;
+    word-break: break-all;
+    text-align: center;
+  }
+
+  .dashboard-secondary-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9rem;
+    width: 100%;
+  }
+
+  .dashboard-card {
+    flex: 1 1 260px;
+    max-width: 340px;
+    min-width: 220px;
+    border: none;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 24px rgba(37, 99, 235, 0.08);
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    background: #fff;
+    text-align: center;
+    padding: 2rem 1.2rem 1.5rem 1.2rem;
+  }
+
+  .dashboard-card .dashboard-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .dashboard-btn {
+    font-weight: 600;
+    border-radius: 0.75rem;
+    font-size: 1.1rem;
+    padding: 0.75rem 0;
+    margin-top: 1.5rem;
+    transition: background 0.2s, color 0.2s;
+    width: 100%;
+  }
+
+  .dashboard-card .card-title,
+  .dashboard-card .dashboard-btn,
+  .dashboard-card .dashboard-icon,
+  .dashboard-upload-card .card-title,
+  .dashboard-upload-card .dashboard-btn,
+  .dashboard-upload-card .dashboard-icon {
+    color: #273a4d !important;
+  }
+
+  .dashboard-card .card-title,
+  .dashboard-upload-card .card-title {
+    font-weight: bold;
+  }
+
+  .dashboard-card .dashboard-btn,
+  .dashboard-upload-card .dashboard-btn {
+    font-weight: 600;
+  }
+
+  .dashboard-card .dashboard-btn {
+    color: #fff !important;
+  }
+
+  .dashboard-card .text-muted,
+  .dashboard-upload-card .text-muted {
+    color: #273a4d !important;
+    opacity: 0.7;
+  }
+
+  @media (max-width: 991px) {
+    .dashboard-main-row,
+    .dashboard-secondary-row {
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .dashboard-upload-card,
+    .dashboard-card {
+      width: 98vw;
+      max-width: 98vw;
+      min-width: unset;
+    }
+
+    .dashboard-upload-card .dashboard-btn {
+      width: 60%;
+    }
+  }
+
+  /* Modal styles */
+  .upload-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(31, 38, 135, 0.1);
+    align-items: center;
+    justify-content: center;
+  }
+  .upload-modal.active {
+    display: flex;
+  }
+  .upload-modal-header {
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 40px 0 rgba(31, 38, 135, 0.18);
+    padding: 2.5rem 2rem 2rem 2rem;
+    width: 420px;
+    position: relative;
+    text-align: center;
+  }
+  .upload-close-btn {
+    position: absolute;
+    right: 1.3rem;
+    top: 1.3rem;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.2s;
+    z-index: 10;
+  }
+  .upload-close-btn:hover {
+    color: #273a4d;
+  }
+  .upload-dropzone {
+    border: 2px dashed #008BC6;
+    border-radius: 16px;
+    background: #f8fafc;
+    padding: 2.2rem 1.5rem 1.5rem 1.5rem;
+    margin: 1.2rem 0 1.2rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .upload-dropzone.dragover {
+    border-color: #008BC6;
+    background: #f1f5ff;
+  }
+  .upload-folder-icon {
+    font-size: 2.7rem;
+    color: #1877ff;
+    margin-bottom: 0.7rem;
+  }
+  .upload-dropzone-text {
+    color: #273a4d;
+    font-size: 1.09rem;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+  .upload-dropzone-or {
+    color: #b0b8c9;
+    font-size: 0.97rem;
+    margin: 0.6rem 0 0.5rem 0;
+    width: 100%;
+    text-align: center;
+    position: relative;
+  }
+  .upload-dropzone-or::before,
+  .upload-dropzone-or::after {
+    content: "";
+    display: inline-block;
+    width: 40%;
+    height: 1px;
+    background: #e5e7eb;
+    vertical-align: middle;
+    margin: 0 0.5rem;
+  }
+  .upload-browse-btn {
+    background: #fff;
+    color: #008BC6;
+    border: 1.5px solid #008BC6;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 0.55rem 1.3rem;
+    cursor: pointer;
+    margin-bottom: 0.2rem;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+  }
+  .upload-browse-btn:hover {
+    background: #008BC6;
+    color: #fff;
+  }
+  .upload-dropzone input[type="file"] {
+    display: none;
+  }
+  .selected-file-name {
+    margin-top: 0.7rem;
+    color: #008BC6;
+    font-size: 1.05rem;
+    font-weight: 500;
+    word-break: break-all;
+    text-align: center;
+  }
+</style>
+
+<div class="container py-4">
+  <!-- Upload File Card -->
+  <div class="dashboard-upload-card">
+    <i class="bi bi-cloud-upload dashboard-icon"></i>
+    <h2
+      class="card-title fw-bold mb-3"
+      style="font-size: 1.5rem; color: #273a4d"
+    >
+      Upload File
+    </h2>
+    <p class="text-muted mb-0" style="font-size: 1.13rem; color: #273a4d">
+      Drag and drop your files to upload and scan for threats.
+    </p>
+    <button
+      type="button"
+      class="btn mt-3"
+      style="background-color: #008bc6; color: #fff"
+      id="open-upload-modal"
+    >
+      Upload
+    </button>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="upload-modal" id="upload-modal">
+    <div class="upload-modal-header">
+      <button
+        class="upload-close-btn"
+        type="button"
+        aria-label="Close"
+        id="close-upload-modal"
+      >
+        &times;
+      </button>
+      <h2
+        class="card-title fw-bold mb-3"
+        style="font-size: 1.5rem; color: #273a4d"
+      >
+        Upload File
+      </h2>
+      <p class="text-muted mb-0" style="font-size: 1.13rem; color: #273a4d">
+        Drag and drop your files to upload and scan for threats.
+      </p>
+      <form method="post" enctype="multipart/form-data" id="file-upload-form">
+        {% csrf_token %}
+        <div class="upload-dropzone" id="upload-dropzone">
+          <div class="upload-folder-icon"></div>
+          <div class="upload-dropzone-text">
+            Drag your file(s) to start uploading
+          </div>
+          <div class="upload-dropzone-or">OR</div>
+          <label class="upload-browse-btn" tabindex="0">
+            Browse files
+            <input type="file" name="file" id="id_file" />
+          </label>
+          <div
+            class="selected-file-name"
+            id="selected-file-name"
+            style="display: none"
+          ></div>
+        </div>
+<button
+  type="submit"
+  class="btn mt-3"
+  id="upload-next-btn"
+  style="background-color: #008bc6; color: #fff;"
+  disabled
+>
+  Upload
+</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Other Cards -->
+  <div class="dashboard-secondary-row">
+    <div class="dashboard-card">
+      <i class="bi bi-shield-check dashboard-icon" style="color: #2563eb"></i>
+      <h5 class="card-title fw-bold mb-3" style="color: #273a4d">
+        Scan Reports
+      </h5>
+      <p class="text-muted small mb-5" style="color: #273a4d">
+        View malware scan results for your files.
+      </p>
+      <a
+        href="{% url 'scan_reports_list' %}"
+        class="btn dashboard-btn mt-auto"
+        style="background: #2563eb; color: #fff"
+        >Show Reports</a
+      >
+    </div>
+    <div class="dashboard-card">
+      <i
+        class="bi bi-file-earmark-lock dashboard-icon"
+        style="color: #22c55e"
+      ></i>
+      <h5 class="card-title fw-bold mb-3" style="color: #273a4d">
+        File Integrity
+      </h5>
+      <p class="text-muted small mb-5" style="color: #273a4d">
+        Check if your files have been modified.
+      </p>
+      <a
+        href="{% url 'file_integrity_status' %}"
+        class="btn dashboard-btn mt-auto"
+        style="background: #22c55e; color: #fff"
+        >Check Integrity</a
+      >
+    </div>
+    <div class="dashboard-card">
+      <i class="bi bi-link-45deg dashboard-icon" style="color: #f59e42"></i>
+      <h5 class="card-title fw-bold mb-3" style="color: #273a4d">
+        URL Reputation
+      </h5>
+      <p class="text-muted small mb-0" style="color: #273a4d">
+        Check if a URL is safe or malicious.
+      </p>
+      <a
+        href="{% url 'url_reputation_checker' %}"
+        class="btn dashboard-btn mt-auto"
+        style="background: #f59e42; color: #fff"
+        >Check URL</a
+      >
+    </div>
+  </div>
+</div>
+
+<script>
+  // Modal open/close logic
+  document.getElementById("open-upload-modal").onclick = function () {
+    document.getElementById("upload-modal").classList.add("active");
+  };
+  document.getElementById("close-upload-modal").onclick = function () {
+    document.getElementById("upload-modal").classList.remove("active");
+  };
+  window.onclick = function (event) {
+    const modal = document.getElementById("upload-modal");
+    if (event.target === modal) {
+      modal.classList.remove("active");
+    }
+  };
+
+  // File input and drag & drop logic
+  const fileInput = document.getElementById("id_file");
+  const dropzone = document.getElementById("upload-dropzone");
+  const fileNameDiv = document.getElementById("selected-file-name");
+  const nextBtn = document.getElementById("upload-next-btn");
+
+  function updateFileUI() {
+    if (fileInput.files && fileInput.files.length > 0) {
+      let names = [];
+      for (let i = 0; i < fileInput.files.length; i++) {
+        names.push(fileInput.files[i].name);
+      }
+      fileNameDiv.textContent = names.join(", ");
+      fileNameDiv.style.display = "block";
+      nextBtn.disabled = false;
+    } else {
+      fileNameDiv.textContent = "";
+      fileNameDiv.style.display = "none";
+      nextBtn.disabled = true;
+    }
+  }
+  fileInput.addEventListener("change", updateFileUI);
+
+  dropzone.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    dropzone.classList.add("dragover");
+  });
+  dropzone.addEventListener("dragleave", function (e) {
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+  });
+  dropzone.addEventListener("drop", function (e) {
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      fileInput.files = e.dataTransfer.files;
+      fileInput.dispatchEvent(new Event("change"));
+    }
+  });
+
+  document
+    .querySelector(".upload-browse-btn")
+    .addEventListener("click", function (e) {
+      fileInput.click();
+    });
+
+  updateFileUI();
+</script>
+
+{% endblock %}

@@ -2,6 +2,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+
+
 class UploadedFile(models.Model):
     STATUS_CHOICES = (
         ('CLEAN', 'Clean'),
@@ -13,12 +15,18 @@ class UploadedFile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     file = models.FileField(upload_to='uploads/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=23, choices=STATUS_CHOICES, default='CLEAN')
-    checksum = models.CharField(max_length=32, blank=True, null=True)
-    malware_scan_result = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=32, default='PENDING')
+    checksum = models.CharField(max_length=64, blank=True)
+    # Add these fields:
+    scan_positives = models.IntegerField(null=True, blank=True)
+    scan_total = models.IntegerField(null=True, blank=True)
+    scan_result = models.TextField(null=True, blank=True)
+    scan_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.file.name
+
+
 class SuspiciousActivity(models.Model):
     EVENT_CHOICES = [
         ('FILE_UPLOAD', 'File Upload'),
@@ -33,3 +41,13 @@ class SuspiciousActivity(models.Model):
 
     def get_event_type_display(self):
         return dict(self.EVENT_CHOICES).get(self.event_type, self.event_type)
+
+
+class ScannedURL(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    url = models.URLField()
+    status = models.CharField(max_length=16)  # e.g. 'active', 'inactive'
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.url} ({self.status})"

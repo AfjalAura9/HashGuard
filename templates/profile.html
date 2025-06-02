@@ -1,163 +1,157 @@
-{% extends 'base.html' %} {% block content %}
+{% extends "base.html" %} {% block title %}Profile{% endblock %} {% block
+content %}
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+  rel="stylesheet"
+/>
 <style>
-    .execute-button {
-        background-color: #dc3545;
-        animation: pulse 1s infinite;
+  body {
+    font-family: "Inter", sans-serif;
+    background: #f8fafc;
+  }
+  .profile-main-card {
+    background: #fff;
+    border-radius: 2rem;
+    max-width: 600px;
+    margin: 48px auto 0 auto;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    padding: 0;
+    overflow: hidden;
+  }
+  .profile-header {
+    display: flex;
+    align-items: center;
+    padding: 2.5rem 2.5rem 1.5rem 2.5rem;
+    gap: 1.5rem;
+  }
+  .profile-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: #f1f3f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    color: #bdbdbd;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .profile-user-info {
+    flex: 1;
+  }
+  .profile-user-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #23272f;
+    margin-bottom: 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .profile-user-email {
+    font-size: 1.08rem;
+    color: #7b7b7b;
+    margin-bottom: 0.2rem;
+    word-break: break-all;
+  }
+  .profile-divider {
+    border: none;
+    border-top: 1px solid #ececec;
+    margin: 0 2.5rem;
+  }
+  .profile-form-section {
+    padding: 2rem 2.5rem 2.5rem 2.5rem;
+  }
+  .profile-label {
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: #23272f;
+    margin-bottom: 0.3rem;
+  }
+  .profile-input,
+  .profile-textarea {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.8rem;
+    font-size: 1.08rem;
+    padding: 0.7rem 1rem;
+    background: #f8fafc;
+    color: #222;
+    outline: none;
+    margin-bottom: 1.2rem;
+    transition: border 0.2s, box-shadow 0.2s;
+    resize: none;
+  }
+  .profile-input:focus,
+  .profile-textarea:focus {
+    border-color: #008bc6;
+    background: #f1f5ff;
+    box-shadow: 0 0 0 2px #008bc622;
+  }
+  @media (max-width: 700px) {
+    .profile-main-card {
+      max-width: 98vw;
+      margin-top: 24px;
     }
-    
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.1);
-        }
-        100% {
-            transform: scale(1);
-        }
+    .profile-header,
+    .profile-form-section {
+      padding: 1.2rem 0.7rem 1rem 0.7rem;
     }
-    
-    body {
-        background-color: black;
+    .profile-divider {
+      margin: 0 0.7rem;
     }
-    
-    h1 {
-        font-size: 24px;
-        color: #05b1f5;
-    }
-    
-    .user-info {
-        background-color: black;
-        padding: 10px;
-        border-radius: 5px;
-    }
-    
-    .upload-button {
-        background-color: #007bff;
-        color: black;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    
-    .upload-button:hover {
-        background-color: #0056b3;
-    }
-    
-    .check-reputation-button {
-        background-color: #28a745;
-        color: black;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    
-    .check-reputation-button:hover {
-        background-color: #1e7e34;
-    }
-    
-    ul {
-        list-style-type: none;
-        padding: 0;
-    }
-    
-    ul li {
-        margin: 10px 0;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        background-color: black;
-    }
-    
-    .file-action-link {
-        margin: 5px;
-        color: #007bff;
-        text-decoration: none;
-        font-weight: bold;
-        transition: color 0.3s;
-    }
-    
-    .file-action-link:hover {
-        color: #0056b3;
-    }
-    
-    .status {
-        font-weight: bold;
-        margin-top: 5px;
-    }
-    
-    .malware-detected {
-        color: red;
-    }
-    
-    .integrity-passed {
-        color: green;
-    }
-    
-    .integrity-failed {
-        color: red;
-    }
-    
-    .logout-link {
-        margin-top: 20px;
-        color: #dc3545;
-        text-decoration: none;
-        font-weight: bold;
-        transition: color 0.3s;
-    }
-    
-    .logout-link:hover {
-        color: #a71d2a;
-    }
+  }
 </style>
-
-<div style="text-align: center;">
-    <h1>Welcome, {{ user.username }}</h1>
-    <div class="user-info">
-        <p>Email: {{ user.email }}</p>
-
-        <form method="post" action="{% url 'upload_file' %}" enctype="multipart/form-data">
-            {% csrf_token %}
-            <label for="file" class="upload-button">Choose File</label>
-            <input type="file" name="file" id="file" style="display: none;">
-            <button type="submit" class="upload-button">Upload File</button>
-        </form>
-        <form method="get" action="{% url 'check_url_reputation' %}"><br>
-            <button type="submit" class="check-reputation-button">Check URL Reputation</button>
-        </form><br>
-        <form method="post" action="{% url 'execute_scan_for_malware' %}">
-            {% csrf_token %}
-            <button type="submit" class="execute-button" id="scan-result-button">Execute Malware Scan</button>
-        </form>
-
-        <div id="scan-result-message"></div>
+<div class="profile-main-card">
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <i class="bi bi-person-circle"></i>
     </div>
-</div>
-
-
-<h2 style="text-align: center;">Uploaded Files:</h2>
-<ul>
-    {% for file in uploaded_files %}
-    <li>
-        <span>{{ forloop.counter }}.</span> <span>{{ file.file.name }}</span><br> {% if file.malware_detected %}
-        <span class="malware-detected status">Malware Detected</span> <br>{% else %}
-        <span class="integrity-passed status">No Malware Detected</span> <br>{% endif %}
-        <div>
-            <a href="{% url 'check_malware' file_id=file.id %}" class="file-action-link">Check for Malware</a>
-            <a href="{% url 'check_integrity' file_id=file.id %}" class="file-action-link">Check Integrity</a> {% if file.status == 'INTEGRITY_CHECK_PASSED' %}
-            <span class="integrity-passed status">Integrity Passed</span> {% elif file.status == 'MODIFIED' %}
-            <span class="integrity-failed status">Integrity Failed</span> {% endif %}
-
-        </div>
-
-    </li>
-    {% endfor %}
-</ul>
-<div style="text-align: center;">
-    <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+    <div class="profile-user-info">
+      <div class="profile-user-name">
+        {{ user.first_name }} {{ user.last_name }}
+      </div>
+      <div class="profile-user-email">{{ user.email }}</div>
+    </div>
+  </div>
+  <hr class="profile-divider" />
+  <div class="profile-form-section">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <label class="profile-label">First Name</label>
+        <input
+          type="text"
+          class="profile-input"
+          value="{{ user.first_name }}"
+          readonly
+        />
+      </div>
+      <div class="col-md-6">
+        <label class="profile-label">Last Name</label>
+        <input
+          type="text"
+          class="profile-input"
+          value="{{ user.last_name }}"
+          readonly
+        />
+      </div>
+      <div class="col-md-12">
+        <label class="profile-label">Email</label>
+        <input
+          type="email"
+          class="profile-input"
+          value="{{ user.email }}"
+          readonly
+        />
+      </div>
+      <div class="col-md-12">
+        <label class="profile-label">Bio</label>
+        <textarea class="profile-textarea" rows="3" readonly>
+{{ user.profile.bio }}</textarea
+        >
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

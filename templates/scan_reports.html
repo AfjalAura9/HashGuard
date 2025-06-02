@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}File Integrity Status{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4"><i class="bi bi-file-earmark-lock"></i> File Integrity Status</h2>
+  {% if files %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">File</th>
+            <th scope="col">Hash</th>
+            <th scope="col">Status</th>
+            <th scope="col">Last Checked</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for file in files %}
+            <tr>
+              <td>{{ file.name }}</td>
+              <td class="font-monospace small">{{ file.hash }}</td>
+              <td>
+                {% if file.status == "INTEGRITY_CHECK_PASSED" %}
+                  <span class="badge bg-success"><i class="bi bi-shield-check"></i> Passed</span>
+                {% elif file.status == "MODIFIED" %}
+                  <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle"></i> Modified</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ file.status }}</span>
+                {% endif %}
+              </td>
+              <td>{{ file.last_checked|date:"Y-m-d H:i" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      No files found.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
