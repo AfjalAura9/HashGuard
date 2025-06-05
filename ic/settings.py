@@ -1,13 +1,13 @@
 import os
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-_8r17wt+!z$=6$een@mw0g=1pv&ia+-*-$e$tn$5l(zl2-3g_j'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'unsafe-default-key')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-DEBUG = True
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -57,14 +57,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ic.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hashguard_db',
-        'USER': 'postgres',
-        'PASSWORD': 'Afsaaura@9',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(default=os.environ.get('postgresql://hashguard_db_user:3T5hX1JzDPubTGnw3GSLxwoq1rfxaHhN@dpg-d10sj0ali9vc7385feig-a/hashguard_db'))
 }
 
 AUTH_PASSWORD_VALIDATORS = [
