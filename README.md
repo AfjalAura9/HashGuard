@@ -1,4 +1,4 @@
-# 🛡️ HashGuard - File Integrity Verification Tool
+# 🛡️ HashGuard - Realtime Malware scanning, File integrity check, URL Reputation check
 
   HashGuard is a web application designed for comprehensive file and URL safety analysis. It empowers users to verify file integrity, scan for malware, and check the reputation of URLs—all from one secure, user-friendly dashboard.
   Whether you're uploading critical documents or browsing untrusted links, HashGuard keeps you safe with robust scanning and verification mechanisms.
