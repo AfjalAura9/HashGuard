@@ -1,5 +1,4 @@
 {% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block content %}
-
 <style>
   .dashboard-main-row {
     display: flex;
@@ -12,7 +11,7 @@
     width: 100%; /* Full width */
     max-width: 100%; /* Ensure it spans the full width */
     background: #fff;
-    border: 2.5px solid #008BC6;
+    border: 2.5px solid #008bc6;
     border-radius: 1rem;
     box-shadow: 0 8px 32px rgba(37, 99, 235, 0.13);
     margin-bottom: 2.5rem;
@@ -221,7 +220,7 @@
     border-radius: 1.5rem;
     box-shadow: 0 8px 40px 0 rgba(31, 38, 135, 0.18);
     padding: 2.5rem 2rem 2rem 2rem;
-    width: 420px;
+    width: 550px;
     position: relative;
     text-align: center;
   }
@@ -241,7 +240,7 @@
     color: #273a4d;
   }
   .upload-dropzone {
-    border: 2px dashed #008BC6;
+    border: 2px dashed #008bc6;
     border-radius: 16px;
     background: #f8fafc;
     padding: 2.2rem 1.5rem 1.5rem 1.5rem;
@@ -253,7 +252,7 @@
     position: relative;
   }
   .upload-dropzone.dragover {
-    border-color: #008BC6;
+    border-color: #008bc6;
     background: #f1f5ff;
   }
   .upload-folder-icon {
@@ -287,8 +286,8 @@
   }
   .upload-browse-btn {
     background: #fff;
-    color: #008BC6;
-    border: 1.5px solid #008BC6;
+    color: #008bc6;
+    border: 1.5px solid #008bc6;
     border-radius: 8px;
     font-weight: 600;
     font-size: 1.05rem;
@@ -298,7 +297,7 @@
     transition: background 0.2s, color 0.2s, border 0.2s;
   }
   .upload-browse-btn:hover {
-    background: #008BC6;
+    background: #008bc6;
     color: #fff;
   }
   .upload-dropzone input[type="file"] {
@@ -306,7 +305,7 @@
   }
   .selected-file-name {
     margin-top: 0.7rem;
-    color: #008BC6;
+    color: #008bc6;
     font-size: 1.05rem;
     font-weight: 500;
     word-break: break-all;
@@ -357,7 +356,12 @@
       <p class="text-muted mb-0" style="font-size: 1.13rem; color: #273a4d">
         Drag and drop your files to upload and scan for threats.
       </p>
-      <form method="post" enctype="multipart/form-data" id="file-upload-form">
+      <form
+        id="file-upload-form"
+        enctype="multipart/form-data"
+        autocomplete="off"
+        onsubmit="return false;"
+      >
         {% csrf_token %}
         <div class="upload-dropzone" id="upload-dropzone">
           <div class="upload-folder-icon"></div>
@@ -367,23 +371,22 @@
           <div class="upload-dropzone-or">OR</div>
           <label class="upload-browse-btn" tabindex="0">
             Browse files
-            <input type="file" name="file" id="id_file" />
+            <input type="file" name="file" id="id_file" multiple />
           </label>
-          <div
-            class="selected-file-name"
-            id="selected-file-name"
-            style="display: none"
-          ></div>
         </div>
-<button
-  type="submit"
-  class="btn mt-3"
-  id="upload-next-btn"
-  style="background-color: #008bc6; color: #fff;"
-  disabled
->
-  Upload
-</button>
+        <div
+          id="progress-list"
+          style="max-height: 160px; overflow-y: auto; margin-top: 1.2rem"
+        ></div>
+        <button
+          type="button"
+          class="btn mt-3"
+          id="upload-next-btn"
+          style="background-color: #008bc6; color: #fff"
+          disabled
+        >
+          Upload
+        </button>
       </form>
     </div>
   </div>
@@ -458,51 +461,117 @@
 
   // File input and drag & drop logic
   const fileInput = document.getElementById("id_file");
-  const dropzone = document.getElementById("upload-dropzone");
-  const fileNameDiv = document.getElementById("selected-file-name");
   const nextBtn = document.getElementById("upload-next-btn");
+  const progressList = document.getElementById("progress-list");
 
-  function updateFileUI() {
-    if (fileInput.files && fileInput.files.length > 0) {
-      let names = [];
-      for (let i = 0; i < fileInput.files.length; i++) {
-        names.push(fileInput.files[i].name);
+  // --- Progress Bar Upload Feature ---
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
       }
-      fileNameDiv.textContent = names.join(", ");
-      fileNameDiv.style.display = "block";
-      nextBtn.disabled = false;
-    } else {
-      fileNameDiv.textContent = "";
-      fileNameDiv.style.display = "none";
-      nextBtn.disabled = true;
     }
+    return cookieValue;
   }
-  fileInput.addEventListener("change", updateFileUI);
+  const csrftoken = getCookie("csrftoken");
 
-  dropzone.addEventListener("dragover", function (e) {
-    e.preventDefault();
-    dropzone.classList.add("dragover");
-  });
-  dropzone.addEventListener("dragleave", function (e) {
-    e.preventDefault();
-    dropzone.classList.remove("dragover");
-  });
-  dropzone.addEventListener("drop", function (e) {
-    e.preventDefault();
-    dropzone.classList.remove("dragover");
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      fileInput.files = e.dataTransfer.files;
-      fileInput.dispatchEvent(new Event("change"));
+  // Start upload as soon as files are selected
+  fileInput.addEventListener("change", function () {
+    const files = fileInput.files;
+    if (!files.length) return;
+    progressList.innerHTML = "";
+    nextBtn.disabled = true;
+
+    let completed = 0;
+    for (let i = 0; i < files.length; i++) {
+      uploadSingleFile(files[i], i, files.length);
+    }
+
+    function uploadSingleFile(file, idx, total) {
+      // Create progress bar UI
+      const progressItem = document.createElement("div");
+      progressItem.className = "mb-3 p-2 border rounded bg-light";
+      progressItem.innerHTML = `
+        <div><strong>Uploading...</strong></div>
+        <div class="small text-muted mb-1">${file.name}</div>
+        <div class="progress mb-1" style="height: 6px;">
+          <div class="progress-bar" style="width:0%"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="small" data-progress="text">0%</span>
+          <button class="btn btn-sm btn-outline-danger" data-cancel type="button">&times;</button>
+        </div>
+      `;
+      progressList.appendChild(progressItem);
+
+      const progressBar = progressItem.querySelector(".progress-bar");
+      const progressText = progressItem.querySelector('[data-progress="text"]');
+      const cancelBtn = progressItem.querySelector("[data-cancel]");
+
+      // AJAX upload
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/ajax-upload/");
+
+      xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percent + "%";
+          progressText.textContent = percent + "%";
+        }
+      };
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          progressBar.classList.add("bg-success");
+          progressText.textContent = "Done";
+        } else {
+          progressBar.classList.add("bg-danger");
+          progressText.textContent = "Failed";
+        }
+        completed++;
+        if (completed === total) {
+          nextBtn.disabled = false;
+          fileInput.value = ""; // Reset file input to prevent re-triggering
+        }
+      };
+      xhr.onerror = function () {
+        progressBar.classList.add("bg-danger");
+        progressText.textContent = "Failed";
+        completed++;
+        if (completed === total) {
+          nextBtn.disabled = false;
+          fileInput.value = ""; // Reset file input to prevent re-triggering
+        }
+      };
+      cancelBtn.onclick = function () {
+        xhr.abort();
+        progressItem.remove();
+        completed++;
+        if (completed === total) {
+          nextBtn.disabled = false;
+          fileInput.value = ""; // Reset file input to prevent re-triggering
+        }
+      };
+
+      const formData = new FormData();
+      formData.append("file", file);
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      xhr.send(formData);
     }
   });
 
-  document
-    .querySelector(".upload-browse-btn")
-    .addEventListener("click", function (e) {
-      fileInput.click();
-    });
-
-  updateFileUI();
+  // Add a click handler for the Next button
+  nextBtn.addEventListener("click", function () {
+    // Example: close modal and clear progress
+    document.getElementById("upload-modal").classList.remove("active");
+    progressList.innerHTML = "";
+    nextBtn.disabled = true;
+  });
 </script>
 
 {% endblock %}

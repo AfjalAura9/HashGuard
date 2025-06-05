@@ -7,7 +7,7 @@
   .url-reputation-main-title {
     font-size: 2.5rem;
     font-weight: 800;
-    color: #1877ff;
+    color: #008bc6;
     text-align: center;
     margin-top: 2.5rem;
     margin-bottom: 0.7rem;
@@ -58,7 +58,7 @@
     font-size: 1rem;
   }
   .url-reputation-form button {
-    background: #1877ff;
+    background: #008bc6;
     color: #fff;
     border: none;
     padding: 0.85rem 2.1rem;
@@ -140,7 +140,7 @@
     font-family: "inter", Arial, sans-serif;
   }
   .url-reputation-table th {
-    background: #1877ff;
+    background: #008bc6;
     color: #fff;
     font-weight: 700;
     font-size: 1.08rem;
@@ -269,6 +269,27 @@
   .delete-btn:hover {
     color: #b71c1c;
   }
+  /* Back button styles */
+  .back-btn {
+    background: #233444;
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    transition: background 0.2s;
+  }
+  .back-btn:hover,
+  .back-btn:focus {
+    background: #008bc6;
+    color: #fff;
+    text-decoration: none;
+  }
   @media (max-width: 700px) {
     .url-reputation-form,
     .url-reputation-table-container {
@@ -287,6 +308,7 @@
 </style>
 
 <div>
+  <!-- Back Button -->
   <div class="url-reputation-main-title">URL REPUTATION CHECKER</div>
   <div class="url-reputation-desc">
     Paste a URL below to check its reputation using VirusTotal.<br />
@@ -301,12 +323,7 @@
       id="url-reputation-form"
     >
       {% csrf_token %}
-      <input
-        type="url"
-        name="url"
-        placeholder="http://example.com"
-        required
-      />
+      <input type="url" name="url" placeholder="http://example.com" required />
       <button type="submit" aria-label="Check URL Reputation">
         <i class="bi bi-search"></i> Scan Now
       </button>
@@ -387,9 +404,16 @@
               </button>
             </td>
           </tr>
+          
           {% endfor %}
+          
         </tbody>
       </table>
+<div class="d-flex justify-content-end mt-3">
+    <button type="button" class="back-btn" onclick="window.history.back()">
+      <i class="bi bi-arrow-left"></i> Back
+    </button>
+  </div>
       {% else %}
       <div class="no-scans-message">No scans performed.</div>
       {% endif %}

@@ -2,6 +2,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class UploadedFile(models.Model):
@@ -13,18 +15,20 @@ class UploadedFile(models.Model):
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    file = models.FileField(upload_to='uploads/')
+    file = models.FileField(upload_to='uploads/',
+                            null=True, blank=True)  # Make optional
+    file_name = models.CharField(max_length=255)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    checksum = models.CharField(max_length=64, blank=True, null=True)
+    scan_result = models.TextField(blank=True, null=True)
+    scan_date = models.DateTimeField(blank=True, null=True)
+    scan_positives = models.IntegerField(blank=True, null=True)
+    scan_total = models.IntegerField(blank=True, null=True)
     status = models.CharField(max_length=32, default='PENDING')
-    checksum = models.CharField(max_length=64, blank=True)
-    # Add these fields:
-    scan_positives = models.IntegerField(null=True, blank=True)
-    scan_total = models.IntegerField(null=True, blank=True)
-    scan_result = models.TextField(null=True, blank=True)
-    scan_date = models.DateTimeField(null=True, blank=True)
+    scan_report_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
-        return self.file.name
+        return self.file_name
 
 
 class SuspiciousActivity(models.Model):
@@ -51,3 +55,24 @@ class ScannedURL(models.Model):
 
     def __str__(self):
         return f"{self.url} ({self.status})"
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(blank=True)
+    profile_pic = models.ImageField(
+        upload_to='profile_pics/', blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()

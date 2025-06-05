@@ -1,5 +1,4 @@
-{% extends "base.html" %} {% block title %}Profile{% endblock %} {% block
-content %}
+{% extends "base.html" %} {% block title %}Profile{% endblock %} {% block content %}
 <link
   href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
   rel="stylesheet"
@@ -104,54 +103,53 @@ content %}
   }
 </style>
 <div class="profile-main-card">
-  <div class="profile-header">
-    <div class="profile-avatar">
-      <i class="bi bi-person-circle"></i>
-    </div>
-    <div class="profile-user-info">
-      <div class="profile-user-name">
-        {{ user.first_name }} {{ user.last_name }}
-      </div>
-      <div class="profile-user-email">{{ user.email }}</div>
-    </div>
-  </div>
-  <hr class="profile-divider" />
-  <div class="profile-form-section">
-    <div class="row g-4">
-      <div class="col-md-6">
-        <label class="profile-label">First Name</label>
-        <input
-          type="text"
-          class="profile-input"
-          value="{{ user.first_name }}"
-          readonly
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="profile-header">
+      <div class="profile-avatar">
+        {% if user.profile.profile_pic %}
+        <img
+          src="{{ user.profile.profile_pic.url }}"
+          alt="Profile Pic"
+          style="width: 96px; height: 96px; border-radius: 50%"
         />
+        {% else %}
+        <i class="bi bi-person-circle"></i>
+        {% endif %}
       </div>
-      <div class="col-md-6">
-        <label class="profile-label">Last Name</label>
-        <input
-          type="text"
-          class="profile-input"
-          value="{{ user.last_name }}"
-          readonly
-        />
-      </div>
-      <div class="col-md-12">
-        <label class="profile-label">Email</label>
-        <input
-          type="email"
-          class="profile-input"
-          value="{{ user.email }}"
-          readonly
-        />
-      </div>
-      <div class="col-md-12">
-        <label class="profile-label">Bio</label>
-        <textarea class="profile-textarea" rows="3" readonly>
-{{ user.profile.bio }}</textarea
-        >
+      <div class="profile-user-info">
+        <div class="profile-user-name">
+          {{ user.first_name }} {{ user.last_name }}
+        </div>
+        <div class="profile-user-email">{{ user.email }}</div>
       </div>
     </div>
-  </div>
+    <hr class="profile-divider" />
+    <div class="profile-form-section">
+      <div class="row g-4">
+        <div class="col-md-6">
+          <label class="profile-label">First Name</label>
+          {{ user_form.first_name }}
+        </div>
+        <div class="col-md-6">
+          <label class="profile-label">Last Name</label>
+          {{ user_form.last_name }}
+        </div>
+        <div class="col-md-12">
+          <label class="profile-label">Email</label>
+          {{ user_form.email }}
+        </div>
+        <div class="col-md-12">
+          <label class="profile-label">Bio</label>
+          {{ profile_form.bio }}
+        </div>
+        <div class="col-md-12">
+          <label class="profile-label">Profile Picture</label>
+          {{ profile_form.profile_pic }}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+    </div>
+  </form>
 </div>
 {% endblock %}

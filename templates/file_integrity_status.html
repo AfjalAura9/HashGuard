@@ -1,43 +1,179 @@
-{% extends "base.html" %}
-{% block title %}File Integrity Status{% endblock %}
+{% extends "base.html" %} {% block title %}File Integrity Status{% endblock %}
 {% block content %}
+<style>
+  .back-btn {
+    background: #233444;
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    transition: background 0.2s;
+  }
+  .back-btn:hover,
+  .back-btn:focus {
+    background: #008bc6;
+    color: #fff;
+    text-decoration: none;
+  }
+  .integrity-table th {
+    background: #f6fbff;
+    color: #233444;
+    font-weight: 600;
+    border-bottom: 2px solid #e3eaf3;
+    vertical-align: middle;
+  }
+  .integrity-table td {
+    vertical-align: middle;
+    background: #fff;
+    border-bottom: 1px solid #e3eaf3;
+  }
+  .integrity-table tr:nth-child(even) td {
+    background: #f8fbfd;
+  }
+  .badge-clean {
+    background: #e6f9ef;
+    color: #22b573;
+    font-weight: 600;
+    border-radius: 1rem;
+    padding: 0.35em 1em;
+    font-size: 1em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+  }
+  .badge-infected {
+    background: #ffeaea;
+    color: #ff5c5c;
+    font-weight: 600;
+    border-radius: 1rem;
+    padding: 0.35em 1em;
+    font-size: 1em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+  }
+  .icon-btn {
+    background: none;
+    border: none;
+    color: #008bc6;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-right: 0.5em;
+    transition: color 0.2s;
+  }
+  .icon-btn.delete {
+    color: #ff5c5c;
+  }
+  .icon-btn:hover {
+    color: #005a87;
+  }
+  .icon-btn.delete:hover {
+    color: #c82333;
+  }
+</style>
 <div class="container py-4">
-  <h2 class="mb-4"><i class="bi bi-file-earmark-lock"></i> File Integrity Status</h2>
+  <button type="button" class="back-btn" onclick="window.history.back()">
+    <i class="bi bi-arrow-left"></i> Back
+  </button>
+  <h2 class="mb-4">
+    <i class="bi bi-file-earmark-lock"></i> File Integrity Status
+  </h2>
   {% if files %}
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover align-middle">
-        <thead class="table-light">
-          <tr>
-            <th scope="col">File</th>
-            <th scope="col">Hash</th>
-            <th scope="col">Status</th>
-            <th scope="col">Last Checked</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for file in files %}
-            <tr>
-              <td>{{ file.name }}</td>
-              <td class="font-monospace small">{{ file.hash }}</td>
-              <td>
-                {% if file.status == "INTEGRITY_CHECK_PASSED" %}
-                  <span class="badge bg-success"><i class="bi bi-shield-check"></i> Passed</span>
-                {% elif file.status == "MODIFIED" %}
-                  <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle"></i> Modified</span>
-                {% else %}
-                  <span class="badge bg-secondary">{{ file.status }}</span>
-                {% endif %}
-              </td>
-              <td>{{ file.last_checked|date:"Y-m-d H:i" }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+  <div class="table-responsive">
+    <table class="table integrity-table align-middle">
+      <thead>
+        <tr>
+          <th>File Name</th>
+          <th>Uploaded At</th>
+          <th>Checksum</th>
+          <th>Integrity Status</th>
+          <th>File Size</th>
+          <th>Scan Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in files %}
+        <tr>
+          <td>
+            <i class="bi bi-file-earmark-text" style="color: #008bc6"></i>
+            {% if file.file and file.file.name %} {{ file.file.name|slice:"9:"
+            }} {% else %} {{ file.file_name }} {% endif %}
+          </td>
+          <td>{{ file.uploaded_at|date:"Y-m-d H:i" }}</td>
+          <td>
+            <span style="font-family: monospace"
+              >{{ file.checksum|default:"-" }}</span
+            >
+          </td>
+          <td>
+            {% if file.status == "INTEGRITY_CHECK_PASSED" or file.status == "No Changes" %}
+            <span class="badge-clean">
+              <i class="bi bi-shield-check"></i>Clean
+            </span>
+            {% else %} {% if file.status == "INFECTED" or file.status == "MODIFIED" %}
+            <span class="badge-infected">
+              <i class="bi bi-x-circle"></i> Modified
+            </span>
+            {% else %}
+            <span class="badge bg-secondary">{{ file.status }}</span>
+            {% endif %}
+          {% endif %}
+          </td>
+          <td>
+            {% if file.file and file.file.name %} {{
+            file.file.size|filesizeformat }} {% else %} - {% endif %}
+          </td>
+          <td>
+            {% if file.scan_status %}
+            <span class="badge bg-info text-dark">{{ file.scan_status }}</span>
+            {% else %}
+            <span class="badge bg-secondary">Not Scanned</span>
+            {% endif %}
+          </td>
+          <td>
+            <a
+              href="{% url 'scan_reports' file.id %}"
+              class="icon-btn"
+              title="View Report"
+            >
+              <i class="bi bi-eye"></i>
+            </a>
+            <form
+              method="post"
+              action="{% url 'delete_file' file.id %}"
+              style="display: inline"
+            >
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="icon-btn delete"
+                title="Delete"
+                onclick="return confirm('Are you sure you want to delete this file?');"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7">
+            <div class="alert alert-info mb-0">No files found.</div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {% else %}
-    <div class="alert alert-info">
-      No files found.
-    </div>
+  <div class="alert alert-info">No files found.</div>
   {% endif %}
 </div>
 {% endblock %}

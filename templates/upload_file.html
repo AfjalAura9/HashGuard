@@ -286,6 +286,7 @@ content %}
             style="display: none"
           ></div>
         </div>
+        <div id="progress-list"></div>
         <button
           type="submit"
           class="btn btn-primary mt-3"
@@ -302,6 +303,7 @@ content %}
       const dropzone = document.getElementById("upload-dropzone");
       const fileNameDiv = document.getElementById("selected-file-name");
       const nextBtn = document.getElementById("upload-next-btn");
+      const progressList = document.getElementById("progress-list");
 
       // Enable Next if file(s) selected
       function updateFileUI() {
@@ -345,6 +347,78 @@ content %}
         .addEventListener("click", function (e) {
           fileInput.click();
         });
+
+      // Progress bar creation
+      function createProgressBar(file) {
+        const wrapper = document.createElement("div");
+        wrapper.style.margin = "10px 0";
+        wrapper.innerHTML = `
+          <div>${file.name}</div>
+          <div class="upload-progress-bar-bg">
+            <div class="upload-progress-bar" style="width:0%"></div>
+          </div>
+          <div class="upload-progress-status">Waiting...</div>
+        `;
+        progressList.appendChild(wrapper);
+        return wrapper;
+      }
+
+      fileInput.addEventListener("change", function () {
+        progressList.innerHTML = "";
+        if (fileInput.files.length > 0) {
+          for (let i = 0; i < fileInput.files.length; i++) {
+            createProgressBar(fileInput.files[i]);
+          }
+          nextBtn.disabled = false;
+        } else {
+          nextBtn.disabled = true;
+        }
+      });
+
+      // Example AJAX upload handler (replace with your backend logic)
+      document
+        .getElementById("file-upload-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          nextBtn.disabled = true;
+          const files = fileInput.files;
+          for (let i = 0; i < files.length; i++) {
+            uploadFile(files[i], i);
+          }
+        });
+
+      function uploadFile(file, idx) {
+        const progressBar = progressList.children[idx].querySelector(
+          ".upload-progress-bar"
+        );
+        const status = progressList.children[idx].querySelector(
+          ".upload-progress-status"
+        );
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/your-upload-endpoint/", true);
+        xhr.upload.onprogress = function (e) {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percent + "%";
+            status.textContent = "Uploading... " + percent + "%";
+          }
+        };
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            progressBar.style.width = "100%";
+            status.textContent = "Scanning...";
+            // Simulate scanning (replace with real AJAX scan call)
+            setTimeout(() => {
+              status.textContent = "Scan complete!";
+            }, 2000);
+          } else {
+            status.textContent = "Upload failed";
+          }
+        };
+        const formData = new FormData();
+        formData.append("file", file);
+        xhr.send(formData);
+      }
 
       // Initial state
       updateFileUI();

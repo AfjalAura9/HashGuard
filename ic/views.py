@@ -1,7 +1,5 @@
 from .forms import DirectoryScanForm
 from .forms import URLReputationForm
-import hashlib
-import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -17,11 +15,15 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.forms import AuthenticationForm
 import requests
 import time
-from django.core.management import call_command
-from django.contrib.auth import authenticate
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+import os
+import json
+from django.utils.timesince import timesince
+from django.urls import reverse
+import tempfile
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from .forms import UserForm, ProfileForm
+from django.http import JsonResponse
 
 VIRUSTOTAL_API_KEY = '5f754625f022fb45c2bc52b7e958284b9d53cfa12456ca73ad21ab5d6d2463ef'
 
@@ -78,14 +80,29 @@ def success(request):
 
 @login_required
 def profile(request):
-    uploaded_files = UploadedFile.objects.filter(user=request.user)
-    integrity_status = {}
-    for file in uploaded_files:
-        if file.status == 'INTEGRITY_CHECK_PASSED':
-            integrity_status[file.id] = 'Integrity check passed. The file is intact.'
-        elif file.status == 'MODIFIED':
-            integrity_status[file.id] = 'File integrity check failed. The file has been modified.'
-    return render(request, 'profile.html', {'uploaded_files': uploaded_files, 'integrity_status': integrity_status})
+    user = request.user
+    profile = user.profile
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = ProfileForm(
+            request.POST, request.FILES, instance=profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True})
+            return redirect('dashboard')
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': user_form.errors})
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = ProfileForm(instance=profile)
+    return render(request, 'profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'user': user,
+    })
 
 
 @login_required
@@ -145,8 +162,10 @@ def check_malware(request, file_id):
         # Save scan results
         uploaded_file.scan_positives = json_response.get('positives')
         uploaded_file.scan_total = json_response.get('total')
-        uploaded_file.scan_result = str(json_response)
+        uploaded_file.scan_result = json.dumps(json_response)
         uploaded_file.scan_date = timezone.now()
+        # Save VirusTotal permalink if present
+        uploaded_file.scan_report_url = json_response.get('permalink')
         uploaded_file.save()
         # ...existing status logic...
         if json_response.get('positives', 0) > 0:
@@ -157,13 +176,12 @@ def check_malware(request, file_id):
                 details=f"Malware detected in file: {uploaded_file.file.name}",
                 timestamp=timezone.now()
             )
-            messages.error(request, "Malware detected in the file.")
         else:
             uploaded_file.status = 'CLEAN'
-            messages.success(request, "File is clean and safe.")
+        uploaded_file.save()
+        messages.success(request, "Malware scan completed.")
     else:
-        messages.error(
-            request, "Failed to check for malware. Please try again later.")
+        messages.error(request, "Failed to scan file with VirusTotal.")
     return redirect('profile')
 
 
@@ -338,9 +356,40 @@ def execute_scan_for_malware(request):
 
 @login_required
 def scan_reports(request, scan_id):
-    uploaded_file = get_object_or_404(
-        UploadedFile, id=scan_id, user=request.user)
-    return render(request, 'scan_reports.html', {'file': uploaded_file})
+    scan = get_object_or_404(UploadedFile, id=scan_id, user=request.user)
+    positives = scan.scan_positives or 0
+    total_engines = scan.scan_total or 1  # Avoid division by zero
+    stroke_dashoffset = 377 - \
+        (positives / total_engines) * 377 if total_engines else 377
+
+    # Parse engines from scan_result JSON
+    engines = []
+    try:
+        result = json.loads(scan.scan_result) if scan.scan_result else {}
+        scans = result.get("scans", {})
+        for engine_name, data in scans.items():
+            engines.append({
+                "name": engine_name,
+                "status": "detected" if data.get("detected") else "undetected",
+                "result": data.get("result", ""),
+            })
+    except Exception:
+        pass
+
+    context = {
+        "file_name": scan.file.name.split('/')[-1] if scan.file and scan.file.name else scan.file_name,
+        "uploaded_at": scan.uploaded_at,
+        "checksum": scan.checksum,
+        "file_size": scan.file.size if scan.file and scan.file.name else 0,
+        "last_scanned": scan.scan_date,
+        "positives": positives,
+        "total_engines": scan.scan_total or 0,
+        "stroke_dashoffset": stroke_dashoffset,
+        "rescan_url": reverse('rescan_file', args=[scan.id]),
+        "virustotal_url": scan.scan_report_url or f"https://www.virustotal.com/gui/file/{scan.checksum}",
+        "engines": engines,
+    }
+    return render(request, 'scan_reports.html', context)
 
 
 @login_required
@@ -351,8 +400,9 @@ def dashboard(request):
 
 
 def file_integrity_status(request):
-    # Your logic here
-    return render(request, 'file_integrity_status.html')
+    files = UploadedFile.objects.filter(
+        user=request.user).order_by('-uploaded_at')
+    return render(request, 'file_integrity_status.html', {'files': files})
 
 
 def scan_reports_list(request):
@@ -375,8 +425,133 @@ def delete_scanned_url(request, url_id):
 
 
 @login_required
-def delete_scan_report(request, report_id):
+def delete_report(request, report_id):
+    report = get_object_or_404(UploadedFile, id=report_id, user=request.user)
     if request.method == "POST":
-        report = get_object_or_404(UploadedFile, id=report_id)
         report.delete()
+        messages.success(request, "Report deleted successfully.")
+        return redirect('scan_reports_list')
     return redirect('scan_reports_list')
+
+
+# Add this helper for checksum
+def calculate_file_checksum(file_path):
+    hash_md5 = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+
+# --- Replace the old scan_file_for_malware function with the new v3 API version ---
+
+def scan_file_for_malware(file_path):
+    """
+    Scan a file using VirusTotal v3 API.
+    """
+    VIRUSTOTAL_API_KEY = '5f754625f022fb45c2bc52b7e958284b9d53cfa12456ca73ad21ab5d6d2463ef'
+    url = 'https://www.virustotal.com/api/v3/files'
+    headers = {'x-apikey': VIRUSTOTAL_API_KEY}
+    with open(file_path, 'rb') as f:
+        files = {'file': (os.path.basename(file_path), f)}
+        response = requests.post(url, files=files, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        analysis_id = data['data']['id']
+        # Poll for analysis results
+        analysis_url = f'https://www.virustotal.com/api/v3/analyses/{analysis_id}'
+        for _ in range(10):
+            analysis_response = requests.get(analysis_url, headers=headers)
+            if analysis_response.status_code == 200:
+                analysis_data = analysis_response.json()
+                status = analysis_data['data']['attributes']['status']
+                if status == 'completed':
+                    stats = analysis_data['data']['attributes']['stats']
+                    positives = stats.get('malicious', 0) + \
+                        stats.get('suspicious', 0)
+                    total = sum(stats.values())
+                    return {
+                        'result': json.dumps(analysis_data),
+                        'date': timezone.now(),
+                        'positives': positives,
+                        'total': total,
+                        'status': 'INFECTED' if positives > 0 else 'CLEAN'
+                    }
+            time.sleep(2)
+    return {
+        'result': 'Scan failed',
+        'date': timezone.now(),
+        'positives': None,
+        'total': None,
+        'status': 'UNKNOWN'
+    }
+
+
+@csrf_exempt
+def ajax_file_upload(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        uploaded_file = request.FILES['file']
+
+        # Ensure the tmp directory exists inside your project
+        project_tmp_dir = os.path.join(settings.MEDIA_ROOT, '..', 'tmp')
+        project_tmp_dir = os.path.abspath(project_tmp_dir)
+        os.makedirs(project_tmp_dir, exist_ok=True)
+
+        temp_file = tempfile.NamedTemporaryFile(
+            delete=False, dir=project_tmp_dir)
+        try:
+            for chunk in uploaded_file.chunks():
+                temp_file.write(chunk)
+            temp_file.close()  # Ensure file is closed before reading
+
+            checksum = calculate_file_checksum(temp_file.name)
+            scan_result = scan_file_for_malware(temp_file.name)
+        finally:
+            try:
+                os.unlink(temp_file.name)
+            except Exception as e:
+                print("Temp file delete failed:", e)
+
+        UploadedFile.objects.create(
+            user=request.user if request.user.is_authenticated else User.objects.first(),
+            file_name=uploaded_file.name,
+            uploaded_at=timezone.now(),
+            checksum=checksum,
+            scan_result=scan_result['result'],
+            scan_date=scan_result['date'],
+            scan_positives=scan_result['positives'],
+            scan_total=scan_result['total'],
+            status=scan_result['status'],
+        )
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'fail'}, status=400)
+
+
+@login_required
+def rescan_file(request, scan_id):
+    uploaded_file = get_object_or_404(
+        UploadedFile, id=scan_id, user=request.user)
+    file_path = uploaded_file.file.path  # <-- THIS IS THE FIX
+    scan_result = scan_file_for_malware(file_path)
+    try:
+        result_json = json.loads(scan_result['result'].replace("'", '"'))
+    except Exception:
+        result_json = {}
+    uploaded_file.scan_result = scan_result['result']
+    uploaded_file.scan_date = scan_result['date']
+    uploaded_file.scan_positives = scan_result['positives']
+    uploaded_file.scan_total = scan_result['total']
+    uploaded_file.status = scan_result['status']
+    uploaded_file.scan_report_url = result_json.get('permalink')
+    uploaded_file.save()
+    messages.success(request, "File re-scanned successfully.")
+    return redirect('scan_reports', scan_id=scan_id)
+
+
+@login_required
+def delete_file(request, file_id):
+    file = get_object_or_404(UploadedFile, id=file_id)
+    if request.method == "POST":
+        file.delete()
+        return redirect('file_integrity_status')
+    return redirect('file_integrity_status')

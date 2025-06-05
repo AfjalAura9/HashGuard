@@ -1,26 +1,46 @@
+# Python
 venv/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Django/Database
 db.sqlite3
 *.sqlite3
+
+# Environment/Security
 .env
 .env.*
+
+# macOS/Windows/Linux system files
 .DS_Store
+Thumbs.db
+
+# Logs and translations
 *.log
 *.pot
+
+# Compiled files
 *.py[cod]
 *.so
+
+# Python packaging
 *.egg
 *.egg-info/
 dist/
 build/
+
+# Backups and swap files
 *.bak
-.idea/
-.vscode/
 *.swp
 *.swo
+
+# IDE/editor/project files
+.idea/
+.vscode/
 node_modules/
+
+# Django static/media
 staticfiles/
 media/

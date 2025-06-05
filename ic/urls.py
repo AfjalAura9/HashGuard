@@ -1,6 +1,8 @@
 # urls.py
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -11,6 +13,7 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
 
     path('upload/', views.upload_file, name='upload_file'),
+    path('ajax-upload/', views.ajax_file_upload, name='ajax_file_upload'),
 
     path('check_integrity/<int:file_id>/',
          views.check_integrity, name='check_integrity'),
@@ -25,6 +28,8 @@ urlpatterns = [
          name='execute_scan_for_malware'),
     path('scan-reports/', views.scan_reports_list, name='scan_reports_list'),
     path('scan-reports/<int:scan_id>/', views.scan_reports, name='scan_reports'),
+    path('scan-reports/<int:scan_id>/rescan/',
+         views.rescan_file, name='rescan_file'),
     path('dashboard/', views.dashboard, name='dashboard'),
 
     path('file-integrity-status/', views.file_integrity_status,
@@ -34,5 +39,7 @@ urlpatterns = [
          views.delete_scanned_url, name='delete_scanned_url'),
 
     path('scan-reports/delete/<int:report_id>/',
-         views.delete_scan_report, name='delete_scan_report'),
-]
+         views.delete_report, name='delete_report'),
+
+    path('delete-file/<int:file_id>/', views.delete_file, name='delete_file'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,186 +1,297 @@
 {% extends "base.html" %} {% block title %}Scan Reports{% endblock %} {% block content %}
 <style>
-  .scan-reports-card {
-    background: rgba(10, 18, 14, 0.98);
-    border-radius: 22px;
-    box-shadow: 0 0 32px 0 rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(0, 0, 0) inset;
-    max-width: 720px;
-    margin: 48px auto 0 auto;
-    color: #ecf0f1;
-    font-family: "Poppins", "Segoe UI", Arial, sans-serif;
-  }
-  .scan-reports-card .card-header {
-    background: linear-gradient(90deg, #008bc6 0%, #008bc6 100%);
-    color: rgb(255, 255, 255);
-    border-radius: 22px 22px 0 0;
-    padding: 1.2rem 2rem;
-    font-weight: 700;
-    font-size: 1.5rem;
-    letter-spacing: 1px;
-    border-bottom: none;
-  }
-  .scan-reports-list {
-    padding: 0;
-    margin: 0;
-    list-style: none;
+  .scan-reports-table-container {
+    background: #fff;
+    border-radius: 1.2rem;
+    box-shadow: 0 4px 24px rgba(37, 99, 235, 0.08);
+    padding: 2rem 1.2rem 1.2rem 1.2rem;
+    margin: 2.5rem auto;
+    max-width: 85vw;
     width: 100%;
   }
-  .scan-reports-list li {
-    display: flex;
-    justify-content: space-between;
+  .scan-reports-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #273a4d;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.2px;
+  }
+  .scan-reports-table th,
+  .scan-reports-table td {
+    vertical-align: middle !important;
+    text-align: center;
+    font-size: 0.99rem;
+    padding: 0.65rem 0.5rem;
+    border-bottom: 1px solid #e3e8ee;
+    background: transparent;
+  }
+  .scan-reports-table th {
+    background: #f8fafc;
+    color: #273a4d;
+    font-weight: 700;
+    border-top: none;
+    user-select: none;
+    font-size: 1.07rem;
+    letter-spacing: 0.01em;
+  }
+  .scan-reports-table th:first-child,
+  .scan-reports-table td:first-child {
+    text-align: left; /* Keep file name left-aligned for readability */
+  }
+  .scan-reports-table tbody tr:nth-child(even) {
+    background: #f4f8fb;
+  }
+  .scan-reports-table tbody tr:hover {
+    background: #e6f4fa;
+    transition: background 0.2s;
+  }
+  .status-badge {
+    display: inline-flex;
     align-items: center;
-    background: #ffffff;
-    padding: 1rem 1.2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    transition: box-shadow 0.2s, border-color 0.2s;
+    gap: 0.3rem;
+    font-weight: 600;
+    font-size: 0.97rem;
+    border-radius: 0.7rem;
+    padding: 0.18em 0.7em;
+    letter-spacing: 0.01em;
   }
-  .scan-reports-list li:hover {
-    border-color: #008bc6;
-    box-shadow: 0 4px 18px 0 rgba(0, 0, 0, 0.1);
+  .status-badge.clean {
+    background: #e6f4ea;
+    color: #1ca14a;
   }
-  .scan-reports-list .file-info {
+  .status-badge.infected {
+    background: #ffeaea;
+    color: #e53935;
+  }
+  .status-badge.unknown {
+    background: #f3f4f6;
+    color: #888;
+  }
+  .details-btn {
+    background: none;
+    border: none;
+    color: #008bc6;
+    font-size: 1.15rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.5rem;
+    transition: background 0.18s, color 0.18s;
+    cursor: pointer;
+  }
+  .details-btn:hover,
+  .details-btn:focus {
+    background: #e6f4fa;
+    color: #1877ff;
+    text-decoration: none;
+  }
+  .file-name-cell {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    min-width: 0;
+    gap: 0.45rem;
+    font-weight: 500;
+    color: #273a4d;
+    font-size: 1.01rem;
+    word-break: break-all;
   }
-  .scan-reports-list .file-info i {
-    font-size: 1.3rem;
+  .file-icon {
+    font-size: 1.15rem;
     color: #008bc6;
     flex-shrink: 0;
   }
-  .scan-reports-list .file-name {
-    font-size: 1.08rem;
-    font-weight: 600;
-    color: #008bc6;
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: inline-block;
-    vertical-align: middle;
-  }
-  .scan-reports-list .file-date {
-    font-size: 0.97rem;
-    color: #008bc6;
-    margin-left: 0.7rem;
-    font-weight: 400;
-    white-space: nowrap;
-  }
-  .scan-reports-list .btn-view {
-    background: linear-gradient(90deg, #008bc6 60%, #008bc6 100%);
-    color: white;
+  .positives-danger {
+    color: #e53935;
     font-weight: 700;
-    border-radius: 30px;
-    font-size: 1.01rem;
-    padding: 8px 22px;
-    transition: background 0.2s, color 0.2s, transform 0.2s;
-    box-shadow: 0 2px 12px rgba(0, 255, 0, 0.03);
-    font-family: "Poppins", "Segoe UI", Arial, sans-serif;
-    letter-spacing: 0.3px;
   }
-  .scan-reports-list .btn-view:hover {
-    background: linear-gradient(90deg, #008bc6 10%, #008bc6 100%);
-    color: white;
-    transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 4px 24px 0 rgba(0, 255, 0, 0.13);
+  .positives-safe {
+    color: #1ca14a;
+    font-weight: 600;
+  }
+  @media (max-width: 900px) {
+    .scan-reports-table-container {
+      padding: 0.7rem 0.1rem;
+      max-width: 99vw;
+    }
+    .scan-reports-title {
+      font-size: 1.2rem;
+    }
+    .scan-reports-table th,
+    .scan-reports-table td {
+      font-size: 0.89rem;
+      padding: 0.4rem 0.2rem;
+    }
+    .file-name-cell {
+      font-size: 0.93rem;
+    }
+  }
+  .table-responsive {
+    border-radius: 1rem;
+    overflow-x: auto;
+  }
+  .back-btn {
+    background: #233444;
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    transition: background 0.2s;
+  }
+  .back-btn:hover,
+  .back-btn:focus {
+    background: #008bc6;
+    color: #fff;
     text-decoration: none;
-  }
-  .scan-reports-empty {
-    background: #ffffff;
-    color: #008bc6;
-    padding: 1.5rem;
-    text-align: center;
-    font-size: 1.13rem;
-    font-family: "Poppins", "Segoe UI", Arial, sans-serif;
-  }
-  @media (max-width: 600px) {
-    .scan-reports-card {
-      padding: 0 2vw;
-      max-width: 98vw;
-    }
-    .scan-reports-list .file-name {
-      max-width: 90px;
-      font-size: 0.97rem;
-    }
-    .scan-reports-list li {
-      padding: 0.7rem 0.5rem;
-    }
-    .scan-reports-card .card-header {
-      font-size: 1.1rem;
-      padding: 0.8rem 1rem;
-    }
   }
 </style>
 
-<h2 class="mb-4">Scan Reports</h2>
-<table class="table table-hover align-middle shadow-sm rounded">
-  <thead class="table-primary">
-    <tr>
-      <th scope="col"><i class="bi bi-file-earmark"></i> File Name</th>
-      <th scope="col"><i class="bi bi-shield-check"></i> Status</th>
-      <th scope="col"><i class="bi bi-calendar"></i> Date</th>
-      <th scope="col"><i class="bi bi-gear"></i> Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for report in reports %}
-    <tr>
-      <td
-        class="fw-semibold text-primary"
-        style="
-          max-width: 220px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        "
-      >
-        <i class="bi bi-file-earmark-text"></i> {{ report.file.name|default:"-"
-        }}
-      </td>
-      <td>
-        {% if report.status == "CLEAN" %}
-        <span class="badge bg-success"
-          ><i class="bi bi-shield-check"></i> Clean</span
-        >
-        {% elif report.status == "MALICIOUS" %}
-        <span class="badge bg-danger"><i class="bi bi-bug"></i> Malicious</span>
-        {% else %}
-        <span class="badge bg-secondary"
-          >{{ report.status|default:"Unknown" }}</span
-        >
-        {% endif %}
-      </td>
-      <td>
-        <i class="bi bi-clock-history"></i>
-        {{ report.uploaded_at|date:"Y-m-d H:i" }}
-      </td>
-      <td>
-        <form
-          method="post"
-          action="{% url 'delete_scan_report' report.id %}"
-          style="display: inline"
-        >
-          {% csrf_token %}
-          <button
-            type="submit"
-            class="btn btn-outline-danger btn-sm"
-            title="Delete"
-            onclick="return confirm('Delete this report?');"
-          >
-            <i class="bi bi-trash"></i>
-          </button>
-        </form>
-      </td>
-    </tr>
-    {% empty %}
-    <tr>
-      <td colspan="4" class="text-center text-secondary py-4">
-        <i class="bi bi-emoji-frown" style="font-size: 2rem"></i><br />
-        No reports found.
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="scan-reports-table-container">
+  <!-- Back Button -->
+  <button type="button" class="back-btn" onclick="window.history.back()">
+    <i class="bi bi-arrow-left"></i> Back
+  </button>
+  <div class="scan-reports-title">
+    <i class="bi bi-shield-check" style="color: #008bc6"></i> Scan Reports
+  </div>
+  <div class="table-responsive">
+    <table class="table scan-reports-table align-middle">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Uploaded At</th>
+          <th>Status</th>
+          <th>Positives</th>
+          <th>Total</th>
+          <th>Scan Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reports %}
+        <tr>
+          <td>
+            <span class="file-name-cell">
+              <i class="bi bi-file-earmark-text file-icon"></i>
+              {{ report.file.name|default:report.file|cut:"uploads/" }}
+            </span>
+          </td>
+          <td>{{ report.uploaded_at|date:"Y-m-d H:i" }}</td>
+          <td>
+            {% if report.status == "INFECTED" %}
+            <span class="status-badge infected"
+              ><i class="bi bi-x-octagon"></i> Infected</span
+            >
+            {% elif report.status == "CLEAN" %}
+            <span class="status-badge clean"
+              ><i class="bi bi-shield-check"></i> Clean</span
+            >
+            {% else %}
+            <span class="status-badge unknown"
+              ><i class="bi bi-question-circle"></i> Unknown</span
+            >
+            {% endif %}
+          </td>
+          <td>
+            {% if report.scan_positives is not None %}
+            <span
+              class="{% if report.scan_positives > 0 %}positives-danger{% else %}positives-safe{% endif %}"
+            >
+              {{ report.scan_positives }}
+            </span>
+            {% else %}-{% endif %}
+          </td>
+          <td>{{ report.scan_total|default:"-" }}</td>
+          <td>{{ report.scan_date|date:"Y-m-d H:i" }}</td>
+          <td>
+            <a
+              href="{% url 'scan_reports' report.id %}"
+              class="details-btn"
+              title="View Details"
+            >
+              <i class="bi bi-eye"></i>
+            </a>
+            <!-- Delete button triggers modal -->
+            <button
+              type="button"
+              class="details-btn"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteModal{{ report.id }}"
+              title="Delete Report"
+            >
+              <i class="bi bi-trash" style="color: #e53935"></i>
+            </button>
+
+            <!-- Modal for confirmation -->
+            <div
+              class="modal fade"
+              id="deleteModal{{ report.id }}"
+              tabindex="-1"
+              aria-labelledby="deleteModalLabel{{ report.id }}"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header" style="border-bottom: none">
+                    <h5
+                      class="modal-title"
+                      id="deleteModalLabel{{ report.id }}"
+                    >
+                      <i class="bi bi-trash" style="color: #e53935"></i> Confirm
+                      Delete
+                    </h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div
+                    class="modal-body text-center"
+                    style="font-size: 1.08rem"
+                  >
+                    Are you sure you want to delete
+                    <span style="font-weight: 600; color: #008bc6">
+                      {{ report.file.name|default:report.file|cut:"uploads/" }}
+                    </span>
+                    ?
+                  </div>
+                  <div class="modal-footer" style="border-top: none">
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary btn-sm"
+                      data-bs-dismiss="modal"
+                    >
+                      Cancel
+                    </button>
+                    <form
+                      method="post"
+                      action="{% url 'delete_report' report.id %}"
+                      style="display: inline"
+                    >
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger btn-sm">
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">
+            No scan reports found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

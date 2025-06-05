@@ -21,7 +21,7 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-     'ic.backends.EmailBackend',
+    'ic.backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -48,6 +48,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'ic.context_processors.profile_forms',
             ],
         },
     },
@@ -91,7 +92,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-LOGIN_URL = '/login/' 
+LOGIN_URL = '/login/'
 LOGOUT_REDIRECT_URL = '/logout/'
 
 MEDIA_ROOT = 'D:/Projects/HashGuard-File-Integrity-Verification-Tool/media/uploads'
