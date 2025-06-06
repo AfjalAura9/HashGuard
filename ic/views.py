@@ -17,6 +17,7 @@ import requests
 import time
 import os
 import json
+from django.contrib.auth import authenticate
 from django.utils.timesince import timesince
 from django.urls import reverse
 import tempfile
@@ -25,7 +26,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .forms import UserForm, ProfileForm
 from django.http import JsonResponse
 
-VIRUSTOTAL_API_KEY = '5f754625f022fb45c2bc52b7e958284b9d53cfa12456ca73ad21ab5d6d2463ef'
+VIRUSTOTAL_API_KEY = os.environ.get('VIRUSTOTAL_API_KEY')
 
 
 def login(request):

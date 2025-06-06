@@ -131,11 +131,9 @@
     <form method="post" novalidate autocomplete="off">
       {% csrf_token %}
       <div class="form-group">
-        <label for="{{ form.email.id_for_label }}" class="form-label"
-          >Email</label
-        >
-        {{ form.email|add_class:"custom-input"|attr:"placeholder:Enter your
-        email" }} {% if form.email.errors %}
+        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+        {{ form.email|add_class:"custom-input"|attr:"placeholder:Enter your email" }}
+        {% if form.email.errors %}
         <div class="text-danger small mt-1">
           {{ form.email.errors|striptags }}
         </div>
@@ -143,11 +141,9 @@
       </div>
       {% if active_tab == 'signin' %}
       <div class="form-group">
-        <label for="{{ form.password.id_for_label }}" class="form-label"
-          >Password</label
-        >
-        {{ form.password|add_class:"custom-input"|attr:"placeholder:Enter your
-        password" }} {% if form.password.errors %}
+        <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+        {{ form.password|add_class:"custom-input"|attr:"placeholder:Enter your password" }}
+        {% if form.password.errors %}
         <div class="text-danger small mt-1">
           {{ form.password.errors|striptags }}
         </div>
@@ -155,22 +151,18 @@
       </div>
       {% endif %} {% if active_tab == 'signup' and form.password1 %}
       <div class="form-group">
-        <label for="{{ form.password1.id_for_label }}" class="form-label"
-          >Password</label
-        >
-        {{ form.password1|add_class:"custom-input"|attr:"placeholder:Enter your
-        password" }} {% if form.password1.errors %}
+        <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
+        {{ form.password1|add_class:"custom-input"|attr:"placeholder:Enter your password" }} 
+        {% if form.password1.errors %}
         <div class="text-danger small mt-1">
           {{ form.password1.errors|striptags }}
         </div>
         {% endif %}
       </div>
       <div class="form-group">
-        <label for="{{ form.password2.id_for_label }}" class="form-label"
-          >Confirm Password</label
-        >
-        {{ form.password2|add_class:"custom-input"|attr:"placeholder:Confirm
-        your password" }} {% if form.password2.errors %}
+        <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
+        {{ form.password2|add_class:"custom-input"|attr:"placeholder:Confirm your password" }} 
+        {% if form.password2.errors %}
         <div class="text-danger small mt-1">
           {{ form.password2.errors|striptags }}
         </div>

@@ -5,7 +5,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'unsafe-default-key')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True
 
 ALLOWED_HOSTS = ['.onrender.com', '127.0.0.1', 'localhost']
 
@@ -56,9 +56,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ic.wsgi.application'
 
-DATABASES = {
-    'default': dj_database_url.config(default=os.environ.get('postgresql://hashguard_db_user:3T5hX1JzDPubTGnw3GSLxwoq1rfxaHhN@dpg-d10sj0ali9vc7385feig-a/hashguard_db'))
-}
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -81,6 +91,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
